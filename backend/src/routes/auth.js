@@ -64,7 +64,7 @@ router.post('/register-tenant', async (req, res) => {
 
     res.status(201).json({ message: 'Tenant created successfully' });
   } catch (err) {
-    await db.query('ROLLBACK');
+    await db.query('ROLLBACK').catch(() => {});
     if (err.code === '23505') return res.status(409).json({ error: 'Email or slug already exists' });
     console.error(err);
     res.status(500).json({ error: 'Server error' });
