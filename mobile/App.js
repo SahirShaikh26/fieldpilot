@@ -1,9 +1,9 @@
 import { useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { useAuth } from './src/hooks/useAuth';
+import { AuthProvider, useAuth } from './src/hooks/useAuth';
 import AppNavigator from './src/navigation/AppNavigator';
 
-export default function App() {
+function RootApp() {
   const { isLoggedIn, restoreSession } = useAuth();
 
   useEffect(() => {
@@ -15,5 +15,13 @@ export default function App() {
       <StatusBar style="light" />
       <AppNavigator isLoggedIn={isLoggedIn} />
     </>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <RootApp />
+    </AuthProvider>
   );
 }
