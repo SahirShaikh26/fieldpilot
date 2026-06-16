@@ -11,6 +11,7 @@ const projectsRoutes = require('./routes/projects');
 const customersRoutes = require('./routes/customers');
 const engineersRoutes = require('./routes/engineers');
 const reportsRoutes = require('./routes/reports');
+const importRoutes = require('./routes/import');
 
 async function migrate() {
   const stmts = [
@@ -45,6 +46,7 @@ app.use('/api/projects', projectsRoutes);
 app.use('/api/customers', customersRoutes);
 app.use('/api/engineers', engineersRoutes);
 app.use('/api/reports', reportsRoutes);
+app.use('/api/import', importRoutes);
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 

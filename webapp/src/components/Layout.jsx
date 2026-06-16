@@ -10,6 +10,7 @@ const NAV = [
   { to: '/engineers', label: 'Team',       icon: '👷' },
   { to: '/analytics', label: 'Analytics',  icon: '📈' },
   { to: '/reports',   label: 'Reports',    icon: '📁' },
+  { to: '/import',    label: 'Import Data', icon: '📥' },
 ];
 
 const styles = {

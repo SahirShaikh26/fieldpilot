@@ -8,6 +8,7 @@ import LogActivityScreen from '../screens/LogActivityScreen';
 import LogsScreen from '../screens/LogsScreen';
 import ProjectsScreen from '../screens/ProjectsScreen';
 import VisitCheckinScreen from '../screens/VisitCheckinScreen';
+import ImportScreen from '../screens/ImportScreen';
 import LoginScreen from '../screens/LoginScreen';
 
 const Tab = createBottomTabNavigator();
@@ -15,7 +16,7 @@ const Stack = createNativeStackNavigator();
 
 const TAB_ICONS = {
   Dashboard: '📊', Logs: '📋', 'Log Activity': '✏️',
-  Projects: '🗂️', 'Check In': '📍',
+  Projects: '🗂️', 'Check In': '📍', Import: '📥',
 };
 
 function TabIcon({ name }) {
@@ -39,6 +40,7 @@ function MainTabs() {
       <Tab.Screen name="Logs" component={LogsScreen} />
       <Tab.Screen name="Projects" component={ProjectsScreen} />
       <Tab.Screen name="Check In" component={VisitCheckinScreen} />
+      <Tab.Screen name="Import" component={ImportScreen} />
     </Tab.Navigator>
   );
 }

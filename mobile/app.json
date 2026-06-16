@@ -34,7 +34,8 @@
         {
           "locationAlwaysAndWhenInUsePermission": "FieldPilot needs location for check-in."
         }
-      ]
+      ],
+      "expo-document-picker"
     ],
     "extra": {
       "eas": {

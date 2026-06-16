@@ -10,6 +10,7 @@ import Engineers from './pages/Engineers';
 import Customers from './pages/Customers';
 import Analytics from './pages/Analytics';
 import Reports from './pages/Reports';
+import Import from './pages/Import';
 
 function RequireAuth({ children }) {
   const { isLoggedIn } = useAuth();
@@ -30,6 +31,7 @@ export default function App() {
           <Route path="customers" element={<Customers />} />
           <Route path="analytics" element={<Analytics />} />
           <Route path="reports" element={<Reports />} />
+          <Route path="import" element={<Import />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
