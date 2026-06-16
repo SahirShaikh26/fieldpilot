@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+
+# Environment files (never commit secrets)
+.env
+.env.local
+.env.production
+
+# Build output
+dist/
+build/
+
+# Expo / React Native
+.expo/
+mobile/.expo/
+mobile/node_modules/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# VS Code
+.vscode/
+*.vsix
+
+# Setup / debug scripts (not needed in production)
+backend/check-db.js
+backend/setup.js
+backend/seed-demo.js
