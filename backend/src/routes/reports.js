@@ -9,32 +9,32 @@ router.use(auth, tenant);
 router.get('/summary', async (req, res) => {
   const { date_from, date_to, engineer_id } = req.query;
 
-  const conditions = ['tenant_id = $1'];
+  const conditions = ['l.tenant_id = $1'];
   const params = [req.tenantId];
   let i = 2;
-  if (date_from)   { conditions.push(`date >= $${i++}`);        params.push(date_from); }
-  if (date_to)     { conditions.push(`date <= $${i++}`);        params.push(date_to); }
-  if (engineer_id) { conditions.push(`engineer_id = $${i++}`);  params.push(engineer_id); }
+  if (date_from)   { conditions.push(`l.date >= $${i++}`);        params.push(date_from); }
+  if (date_to)     { conditions.push(`l.date <= $${i++}`);        params.push(date_to); }
+  if (engineer_id) { conditions.push(`l.engineer_id = $${i++}`);  params.push(engineer_id); }
 
   const where = conditions.join(' AND ');
 
   try {
     const totals = await db.query(
       `SELECT
-         COUNT(*)                        AS total_logs,
-         SUM(hours)                      AS total_hours,
-         SUM(billing_inr)                AS total_billing,
-         SUM(cost_inr)                   AS total_cost,
-         COUNT(DISTINCT engineer_id)     AS active_engineers,
-         COUNT(DISTINCT customer_id)     AS customers_served
-       FROM activity_logs WHERE ${where}`,
+         COUNT(*)                          AS total_logs,
+         SUM(l.hours)                      AS total_hours,
+         SUM(l.billing_inr)                AS total_billing,
+         SUM(l.cost_inr)                   AS total_cost,
+         COUNT(DISTINCT l.engineer_id)     AS active_engineers,
+         COUNT(DISTINCT l.customer_id)     AS customers_served
+       FROM activity_logs l WHERE ${where}`,
       params
     );
 
     const byActivity = await db.query(
-      `SELECT activity_code, COUNT(*) AS count, SUM(hours) AS hours, SUM(billing_inr) AS billing
-       FROM activity_logs WHERE ${where}
-       GROUP BY activity_code ORDER BY count DESC`,
+      `SELECT l.activity_code, COUNT(*) AS count, SUM(l.hours) AS hours, SUM(l.billing_inr) AS billing
+       FROM activity_logs l WHERE ${where}
+       GROUP BY l.activity_code ORDER BY count DESC`,
       params
     );
 
@@ -52,11 +52,11 @@ router.get('/summary', async (req, res) => {
     );
 
     const byMonth = await db.query(
-      `SELECT TO_CHAR(date,'YYYY-MM') AS month,
+      `SELECT TO_CHAR(l.date,'YYYY-MM') AS month,
               COUNT(*)::int AS logs,
-              SUM(hours) AS hours,
-              SUM(billing_inr) AS billing
-       FROM activity_logs WHERE ${where}
+              SUM(l.hours) AS hours,
+              SUM(l.billing_inr) AS billing
+       FROM activity_logs l WHERE ${where}
        GROUP BY month ORDER BY month`,
       params
     );
