@@ -4,16 +4,17 @@ import { format, startOfMonth } from 'date-fns';
 import toast from 'react-hot-toast';
 import api from '../api/client';
 import { useAuth } from '../hooks/useAuth';
+import colors from '../theme';
 
-const card = { background:'#fff', borderRadius:10, padding:24, boxShadow:'0 1px 4px rgba(0,0,0,.08)', marginBottom:20 };
+const card = { background:colors.white, borderRadius:10, padding:24, boxShadow:'0 1px 4px rgba(0,0,0,.08)', marginBottom:20 };
 const s = {
-  h1:    { fontSize:22, fontWeight:700, color:'#1e3a5f', marginBottom:20 },
+  h1:    { fontSize:22, fontWeight:700, color:colors.navy, marginBottom:20 },
   filter:{ display:'flex', gap:12, alignItems:'center', marginBottom:24, flexWrap:'wrap' },
-  label: { fontSize:13, color:'#64748b' },
-  input: { padding:'7px 12px', border:'1px solid #d1d5db', borderRadius:7, fontSize:13 },
-  btn:   { padding:'8px 16px', background:'#2563eb', color:'#fff', border:'none', borderRadius:7, fontSize:13, fontWeight:600, cursor:'pointer' },
-  th:    { textAlign:'left', padding:'8px 12px', color:'#64748b', fontWeight:600, fontSize:12, textTransform:'uppercase', borderBottom:'2px solid #e2e8f0' },
-  td:    { padding:'8px 12px', fontSize:13, borderBottom:'1px solid #f1f5f9' },
+  label: { fontSize:13, color:colors.textMuted },
+  input: { padding:'7px 12px', border:`1px solid ${colors.borderInput}`, borderRadius:7, fontSize:13 },
+  btn:   { padding:'8px 16px', background:colors.blue, color:colors.white, border:'none', borderRadius:7, fontSize:13, fontWeight:600, cursor:'pointer' },
+  th:    { textAlign:'left', padding:'8px 12px', color:colors.textMuted, fontWeight:600, fontSize:12, textTransform:'uppercase', borderBottom:`2px solid ${colors.border}` },
+  td:    { padding:'8px 12px', fontSize:13, borderBottom:`1px solid ${colors.bgAlt}` },
 };
 
 export default function Reports() {
@@ -59,6 +60,7 @@ export default function Reports() {
         <input style={s.input} type="date" value={dateTo} onChange={e=>setDateTo(e.target.value)} />
         <button style={s.btn} onClick={()=>refetch()}>Run Report</button>
         {canExport && <button style={{ ...s.btn, background:'#059669' }} onClick={handleExport}>Export CSV</button>}
+
       </div>
 
       {isLoading ? <p>Loading…</p> : t && (
@@ -74,9 +76,9 @@ export default function Reports() {
                 { label:'Gross Margin',     value: t.total_billing && t.total_cost ? `₹${Number(t.total_billing - t.total_cost).toLocaleString('en-IN')}` : '—' },
                 { label:'Customers Served', value: t.customers_served },
               ].map(({ label, value }) => (
-                <div key={label} style={{ background:'#f8fafc', borderRadius:8, padding:'12px 16px' }}>
-                  <div style={{ fontSize:18, fontWeight:800, color:'#1e3a5f' }}>{value}</div>
-                  <div style={{ fontSize:12, color:'#64748b', marginTop:3 }}>{label}</div>
+                <div key={label} style={{ background:colors.bgSlate, borderRadius:8, padding:'12px 16px' }}>
+                  <div style={{ fontSize:18, fontWeight:800, color:colors.navy }}>{value}</div>
+                  <div style={{ fontSize:12, color:colors.textMuted, marginTop:3 }}>{label}</div>
                 </div>
               ))}
             </div>

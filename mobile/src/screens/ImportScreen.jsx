@@ -4,6 +4,7 @@ import * as DocumentPicker from 'expo-document-picker';
 import * as FileSystem from 'expo-file-system';
 import Papa from 'papaparse';
 import api from '../api/client';
+import COLORS from '../theme';
 
 const ENTITIES = [
   { key: 'customers', label: 'Customers', icon: '🏭', required: ['name'], columns: 'name, code, city, region, contact_name, contact_phone, address' },
@@ -130,28 +131,28 @@ export default function ImportScreen() {
 }
 
 const s = StyleSheet.create({
-  container:      { flex: 1, backgroundColor: '#f0f4ff' },
+  container:      { flex: 1, backgroundColor: COLORS.bg },
   content:        { padding: 20, paddingBottom: 40 },
-  title:          { fontSize: 22, fontWeight: '800', color: '#1e3a5f', marginBottom: 4 },
-  sub:            { fontSize: 14, color: '#64748b', marginBottom: 20 },
+  title:          { fontSize: 22, fontWeight: '800', color: COLORS.navy, marginBottom: 4 },
+  sub:            { fontSize: 14, color: COLORS.textMuted, marginBottom: 20 },
   tabRow:         { marginBottom: 16 },
-  tab:            { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, borderWidth: 1.5, borderColor: '#d1d5db', marginRight: 8, backgroundColor: '#fff' },
-  tabActive:      { backgroundColor: '#2563eb', borderColor: '#2563eb' },
-  tabText:        { fontSize: 13, fontWeight: '600', color: '#374151' },
-  tabTextActive:  { color: '#fff' },
-  card:           { backgroundColor: '#fff', borderRadius: 14, padding: 18, marginBottom: 16, elevation: 2 },
-  cardTitle:      { fontSize: 16, fontWeight: '700', color: '#1e3a5f', marginBottom: 8 },
-  hint:           { fontSize: 12, color: '#94a3b8', marginBottom: 4 },
-  bold:           { fontWeight: '700', color: '#374151' },
-  uploadBtn:      { marginTop: 14, backgroundColor: '#2563eb', borderRadius: 10, padding: 14, alignItems: 'center' },
-  uploadBtnText:  { color: '#fff', fontSize: 15, fontWeight: '700' },
+  tab:            { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, borderWidth: 1.5, borderColor: COLORS.borderInput, marginRight: 8, backgroundColor: COLORS.white },
+  tabActive:      { backgroundColor: COLORS.blue, borderColor: COLORS.blue },
+  tabText:        { fontSize: 13, fontWeight: '600', color: COLORS.text },
+  tabTextActive:  { color: COLORS.white },
+  card:           { backgroundColor: COLORS.white, borderRadius: 14, padding: 18, marginBottom: 16, elevation: 2 },
+  cardTitle:      { fontSize: 16, fontWeight: '700', color: COLORS.navy, marginBottom: 8 },
+  hint:           { fontSize: 12, color: COLORS.textFaint, marginBottom: 4 },
+  bold:           { fontWeight: '700', color: COLORS.text },
+  uploadBtn:      { marginTop: 14, backgroundColor: COLORS.blue, borderRadius: 10, padding: 14, alignItems: 'center' },
+  uploadBtnText:  { color: COLORS.white, fontSize: 15, fontWeight: '700' },
   previewHeader:  { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
   clearText:      { color: '#ef4444', fontSize: 13, fontWeight: '600' },
   tableRow:       { flexDirection: 'row' },
-  rowAlt:         { backgroundColor: '#f8fafc' },
-  cell:           { width: 120, paddingHorizontal: 8, paddingVertical: 6, fontSize: 12, color: '#374151', borderBottomWidth: 1, borderBottomColor: '#f1f5f9' },
-  cellHead:       { fontWeight: '700', color: '#1e3a5f', backgroundColor: '#f1f5f9' },
-  moreRows:       { textAlign: 'center', padding: 8, color: '#94a3b8', fontSize: 12 },
-  importBtn:      { marginTop: 16, backgroundColor: '#16a34a', borderRadius: 10, padding: 14, alignItems: 'center' },
-  importBtnText:  { color: '#fff', fontSize: 15, fontWeight: '700' },
+  rowAlt:         { backgroundColor: COLORS.bgSlate },
+  cell:           { width: 120, paddingHorizontal: 8, paddingVertical: 6, fontSize: 12, color: COLORS.text, borderBottomWidth: 1, borderBottomColor: COLORS.bgAlt },
+  cellHead:       { fontWeight: '700', color: COLORS.navy, backgroundColor: COLORS.bgAlt },
+  moreRows:       { textAlign: 'center', padding: 8, color: COLORS.textFaint, fontSize: 12 },
+  importBtn:      { marginTop: 16, backgroundColor: COLORS.green, borderRadius: 10, padding: 14, alignItems: 'center' },
+  importBtnText:  { color: COLORS.white, fontSize: 15, fontWeight: '700' },
 });

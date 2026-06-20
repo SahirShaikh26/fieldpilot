@@ -3,19 +3,20 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import api from '../api/client';
 import { useAuth } from '../hooks/useAuth';
+import colors from '../theme';
 
 const s = {
-  h1:    { fontSize:22, fontWeight:700, color:'#1e3a5f', marginBottom:20 },
+  h1:    { fontSize:22, fontWeight:700, color:colors.navy, marginBottom:20 },
   toolbar:{ display:'flex', gap:12, marginBottom:16 },
-  input: { padding:'8px 12px', border:'1px solid #d1d5db', borderRadius:7, fontSize:13, width:'100%', maxWidth:360 },
-  btn:   { padding:'8px 16px', background:'#2563eb', color:'#fff', border:'none', borderRadius:7, fontSize:13, fontWeight:600, cursor:'pointer' },
-  table: { width:'100%', borderCollapse:'collapse', background:'#fff', borderRadius:10, overflow:'hidden', boxShadow:'0 1px 4px rgba(0,0,0,.08)' },
-  th:    { padding:'10px 14px', background:'#f8fafc', textAlign:'left', fontSize:12, fontWeight:700, color:'#64748b', borderBottom:'1px solid #e2e8f0', textTransform:'uppercase' },
-  td:    { padding:'10px 14px', fontSize:13, borderBottom:'1px solid #f1f5f9', color:'#374151' },
+  input: { padding:'8px 12px', border:`1px solid ${colors.borderInput}`, borderRadius:7, fontSize:13, width:'100%', maxWidth:360 },
+  btn:   { padding:'8px 16px', background:colors.blue, color:colors.white, border:'none', borderRadius:7, fontSize:13, fontWeight:600, cursor:'pointer' },
+  table: { width:'100%', borderCollapse:'collapse', background:colors.white, borderRadius:10, overflow:'hidden', boxShadow:'0 1px 4px rgba(0,0,0,.08)' },
+  th:    { padding:'10px 14px', background:colors.bgSlate, textAlign:'left', fontSize:12, fontWeight:700, color:colors.textMuted, borderBottom:`1px solid ${colors.border}`, textTransform:'uppercase' },
+  td:    { padding:'10px 14px', fontSize:13, borderBottom:`1px solid ${colors.bgAlt}`, color:colors.text },
   modal: { position:'fixed', inset:0, background:'rgba(0,0,0,.4)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:100 },
-  mcard: { background:'#fff', borderRadius:12, padding:32, width:'min(480px, calc(100vw - 32px))', maxHeight:'90vh', overflowY:'auto' },
-  label: { display:'block', fontSize:13, fontWeight:600, color:'#374151', marginBottom:5 },
-  minput:{ width:'100%', padding:'9px 12px', border:'1px solid #d1d5db', borderRadius:7, fontSize:14, marginBottom:12 },
+  mcard: { background:colors.white, borderRadius:12, padding:32, width:'min(480px, calc(100vw - 32px))', maxHeight:'90vh', overflowY:'auto' },
+  label: { display:'block', fontSize:13, fontWeight:600, color:colors.text, marginBottom:5 },
+  minput:{ width:'100%', padding:'9px 12px', border:`1px solid ${colors.borderInput}`, borderRadius:7, fontSize:14, marginBottom:12 },
   row:   { display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 },
 };
 
@@ -64,7 +65,7 @@ export default function Customers() {
               </tr>
             </thead>
             <tbody>
-              {data?.length === 0 && <tr><td colSpan={7} style={{ ...s.td, textAlign:'center', color:'#94a3b8', padding:32 }}>No customers found</td></tr>}
+              {data?.length === 0 && <tr><td colSpan={7} style={{ ...s.td, textAlign:'center', color:colors.textFaint, padding:32 }}>No customers found</td></tr>}
               {data?.map(c=>(
                 <tr key={c.id}>
                   <td style={{ ...s.td, fontWeight:600 }}>{c.code}</td>
@@ -74,7 +75,7 @@ export default function Customers() {
                   <td style={s.td}>{c.contact_name||'—'}</td>
                   <td style={s.td}>{c.contact_phone||'—'}</td>
                   <td style={s.td}>
-                    {canEdit && <button style={{ ...s.btn, background:'#f8fafc', color:'#374151', fontSize:12, padding:'5px 12px' }}
+                    {canEdit && <button style={{ ...s.btn, background:colors.bgSlate, color:colors.text, fontSize:12, padding:'5px 12px' }}
                       onClick={()=>{ setForm(c); setModal(true); }}>Edit</button>}
                   </td>
                 </tr>
@@ -104,7 +105,7 @@ export default function Customers() {
               <label style={s.label}>Address</label>
               <input style={s.minput} value={form.address} onChange={set('address')} placeholder="Full address" />
               <div style={{ display:'flex', gap:10, marginTop:8 }}>
-                <button type="button" style={{ ...s.btn, background:'#f1f5f9', color:'#374151' }} onClick={()=>setModal(false)}>Cancel</button>
+                <button type="button" style={{ ...s.btn, background:colors.bgAlt, color:colors.text }} onClick={()=>setModal(false)}>Cancel</button>
                 <button type="submit" style={s.btn} disabled={save.isPending}>{save.isPending?'Saving…':'Save'}</button>
               </div>
             </form>

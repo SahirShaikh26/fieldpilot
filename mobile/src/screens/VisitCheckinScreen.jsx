@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet, Alert, ScrollView, ActivityIn
 import * as Location from 'expo-location';
 import { format } from 'date-fns';
 import api from '../api/client';
+import COLORS from '../theme';
 
 export default function VisitCheckinScreen() {
   const [attendance, setAttendance] = useState(null);
@@ -127,21 +128,21 @@ export default function VisitCheckinScreen() {
 }
 
 const s = StyleSheet.create({
-  container:  { flex:1, backgroundColor:'#f0f4ff' },
+  container:  { flex:1, backgroundColor:COLORS.bg },
   content:    { padding:20 },
-  title:      { fontSize:22, fontWeight:'800', color:'#1e3a5f', marginBottom:4 },
-  date:       { fontSize:14, color:'#64748b', marginBottom:24 },
-  card:       { backgroundColor:'#fff', borderRadius:14, padding:20, elevation:2, marginBottom:20 },
+  title:      { fontSize:22, fontWeight:'800', color:COLORS.navy, marginBottom:4 },
+  date:       { fontSize:14, color:COLORS.textMuted, marginBottom:24 },
+  card:       { backgroundColor:COLORS.white, borderRadius:14, padding:20, elevation:2, marginBottom:20 },
   statusRow:  { flexDirection:'row', alignItems:'center', marginBottom:16 },
   dot:        { width:12, height:12, borderRadius:6, marginRight:10 },
-  statusText: { fontSize:15, fontWeight:'600', color:'#374151' },
-  timeRow:    { flexDirection:'row', justifyContent:'space-between', paddingVertical:8, borderTopWidth:1, borderTopColor:'#f1f5f9' },
-  timeLabel:  { color:'#64748b', fontSize:14 },
-  timeValue:  { fontWeight:'700', color:'#1e3a5f', fontSize:14 },
+  statusText: { fontSize:15, fontWeight:'600', color:COLORS.text },
+  timeRow:    { flexDirection:'row', justifyContent:'space-between', paddingVertical:8, borderTopWidth:1, borderTopColor:COLORS.bgAlt },
+  timeLabel:  { color:COLORS.textMuted, fontSize:14 },
+  timeValue:  { fontWeight:'700', color:COLORS.navy, fontSize:14 },
   btn:        { borderRadius:14, padding:18, alignItems:'center', marginBottom:12 },
-  btnGreen:   { backgroundColor:'#16a34a' },
-  btnRed:     { backgroundColor:'#dc2626' },
-  btnText:    { color:'#fff', fontSize:17, fontWeight:'700' },
-  doneCard:   { backgroundColor:'#dcfce7', borderRadius:12, padding:16, alignItems:'center' },
-  doneText:   { color:'#16a34a', fontSize:15, fontWeight:'600' },
+  btnGreen:   { backgroundColor:COLORS.green },
+  btnRed:     { backgroundColor:COLORS.red },
+  btnText:    { color:COLORS.white, fontSize:17, fontWeight:'700' },
+  doneCard:   { backgroundColor:COLORS.greenBg, borderRadius:12, padding:16, alignItems:'center' },
+  doneText:   { color:COLORS.green, fontSize:15, fontWeight:'600' },
 });

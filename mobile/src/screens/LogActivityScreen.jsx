@@ -3,6 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert,
 import { Picker } from '@react-native-picker/picker';
 import { format } from 'date-fns';
 import api from '../api/client';
+import COLORS from '../theme';
 
 const ACTIVITY_CODES = [
   { code:'PM', label:'PM — Preventive Maintenance' },
@@ -128,16 +129,16 @@ export default function LogActivityScreen({ navigation }) {
 }
 
 const s = StyleSheet.create({
-  container:  { flex:1, backgroundColor:'#f0f4ff' },
+  container:  { flex:1, backgroundColor:COLORS.bg },
   content:    { padding:16, paddingBottom:40 },
   field:      { marginBottom:14, flex:1 },
-  label:      { fontSize:13, fontWeight:'600', color:'#374151', marginBottom:5 },
-  input:      { backgroundColor:'#fff', borderWidth:1, borderColor:'#d1d5db', borderRadius:8, padding:11, fontSize:14, color:'#1e293b' },
+  label:      { fontSize:13, fontWeight:'600', color:COLORS.text, marginBottom:5 },
+  input:      { backgroundColor:COLORS.white, borderWidth:1, borderColor:COLORS.borderInput, borderRadius:8, padding:11, fontSize:14, color:COLORS.textDark },
   textarea:   { height:80 },
   half:       { flex:1 },
-  pickerWrap: { backgroundColor:'#fff', borderWidth:1, borderColor:'#d1d5db', borderRadius:8, overflow:'hidden' },
+  pickerWrap: { backgroundColor:COLORS.white, borderWidth:1, borderColor:COLORS.borderInput, borderRadius:8, overflow:'hidden' },
   row:        { flexDirection:'row', gap:12 },
-  btn:        { backgroundColor:'#2563eb', borderRadius:12, padding:16, alignItems:'center', marginTop:8 },
+  btn:        { backgroundColor:COLORS.blue, borderRadius:12, padding:16, alignItems:'center', marginTop:8 },
   btnDisabled:{ opacity:.6 },
-  btnText:    { color:'#fff', fontSize:16, fontWeight:'700' },
+  btnText:    { color:COLORS.white, fontSize:16, fontWeight:'700' },
 });

@@ -1,26 +1,28 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useAuth } from '../hooks/useAuth';
 import api from '../api/client';
+import colors from '../theme';
 
 const s = {
-  page:    { minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center', background:'#f0f4ff', padding:'20px 16px' },
-  card:    { background:'#fff', borderRadius:12, padding:40, width:'100%', maxWidth:420, boxShadow:'0 4px 24px rgba(0,0,0,.1)' },
-  logo:    { textAlign:'center', fontSize:28, fontWeight:800, color:'#1e3a5f', marginBottom:8 },
-  sub:     { textAlign:'center', color:'#64748b', fontSize:14, marginBottom:32 },
-  label:   { display:'block', fontSize:13, fontWeight:600, color:'#374151', marginBottom:6 },
-  input:   { width:'100%', padding:'10px 12px', border:'1px solid #d1d5db', borderRadius:8, fontSize:14, outline:'none', marginBottom:16, boxSizing:'border-box' },
-  btn:     { width:'100%', padding:12, background:'#2563eb', color:'#fff', border:'none', borderRadius:8, fontSize:15, fontWeight:600, cursor:'pointer', marginTop:4 },
-  link:    { textAlign:'center', marginTop:20, fontSize:13, color:'#64748b' },
-  linkBtn: { color:'#2563eb', fontWeight:600, cursor:'pointer', background:'none', border:'none', fontSize:13, padding:0 },
-  divider: { textAlign:'center', color:'#94a3b8', fontSize:12, margin:'8px 0' },
+  page:    { minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center', background:colors.bg, padding:'20px 16px' },
+  card:    { background:colors.white, borderRadius:12, padding:40, width:'100%', maxWidth:420, boxShadow:'0 4px 24px rgba(0,0,0,.1)' },
+  logo:    { textAlign:'center', fontSize:28, fontWeight:800, color:colors.navy, marginBottom:8 },
+  sub:     { textAlign:'center', color:colors.textMuted, fontSize:14, marginBottom:32 },
+  label:   { display:'block', fontSize:13, fontWeight:600, color:colors.text, marginBottom:6 },
+  input:   { width:'100%', padding:'10px 12px', border:`1px solid ${colors.borderInput}`, borderRadius:8, fontSize:14, outline:'none', marginBottom:16, boxSizing:'border-box' },
+  btn:     { width:'100%', padding:12, background:colors.blue, color:colors.white, border:'none', borderRadius:8, fontSize:15, fontWeight:600, cursor:'pointer', marginTop:4 },
+  link:    { textAlign:'center', marginTop:20, fontSize:13, color:colors.textMuted },
+  linkBtn: { color:colors.blue, fontWeight:600, cursor:'pointer', background:'none', border:'none', fontSize:13, padding:0 },
+  divider: { textAlign:'center', color:colors.textFaint, fontSize:12, margin:'8px 0' },
 };
 
 export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
-  const [mode, setMode] = useState('login');
+  const [searchParams] = useSearchParams();
+  const [mode, setMode] = useState(searchParams.get('mode') === 'register' ? 'register' : 'login');
   const [loading, setLoading] = useState(false);
 
   const [email, setEmail] = useState('');
@@ -76,7 +78,7 @@ export default function Login() {
           <form onSubmit={handleRegister}>
             <label style={s.label}>Company Name</label>
             <input style={s.input} value={companyName} onChange={e => setCompanyName(e.target.value)} required placeholder="Acme Field Services" />
-            <label style={s.label}>Company Slug <span style={{color:'#94a3b8',fontWeight:400}}>(short ID, e.g. acme)</span></label>
+            <label style={s.label}>Company Slug <span style={{color:colors.textFaint,fontWeight:400}}>(short ID, e.g. acme)</span></label>
             <input style={s.input} value={slug} onChange={e => setSlug(e.target.value)} required placeholder="acme" pattern="[a-zA-Z0-9-]+" />
             <label style={s.label}>Your Name</label>
             <input style={s.input} value={adminName} onChange={e => setAdminName(e.target.value)} required placeholder="John Smith" />

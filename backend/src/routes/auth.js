@@ -25,7 +25,7 @@ router.post('/login', async (req, res) => {
     if (!valid) return res.status(401).json({ error: 'Invalid credentials' });
 
     const token = jwt.sign(
-      { id: user.id, tenant_id: user.tenant_id, role: user.role, name: user.name },
+      { id: user.id, tenant_id: user.tenant_id, role: user.role, name: user.name, email: user.email },
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
@@ -52,7 +52,8 @@ router.post('/register-tenant', async (req, res) => {
 
     await db.query('BEGIN');
     const { rows: [tenant] } = await db.query(
-      `INSERT INTO tenants (name, slug) VALUES ($1, $2) RETURNING id`,
+      `INSERT INTO tenants (name, slug, plan_status, trial_ends_at)
+       VALUES ($1, $2, 'trialing', NOW() + INTERVAL '14 days') RETURNING id`,
       [company_name, slug]
     );
     await db.query(
@@ -61,6 +62,9 @@ router.post('/register-tenant', async (req, res) => {
       [tenant.id, admin_name, admin_email, hash]
     );
     await db.query('COMMIT');
+
+    // No Razorpay customer pre-creation needed — customer_id attaches
+    // automatically once they complete the subscription checkout (see billing.js).
 
     res.status(201).json({ message: 'Tenant created successfully' });
   } catch (err) {

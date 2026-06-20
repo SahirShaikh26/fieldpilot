@@ -3,6 +3,7 @@ import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Alert } from 'rea
 import { format, startOfMonth } from 'date-fns';
 import { useAuth } from '../hooks/useAuth';
 import api from '../api/client';
+import COLORS from '../theme';
 
 function StatCard({ label, value, color = '#2563eb' }) {
   return (
@@ -83,25 +84,25 @@ export default function DashboardScreen({ navigation }) {
 }
 
 const s = StyleSheet.create({
-  container:    { flex:1, backgroundColor:'#f0f4ff' },
+  container:    { flex:1, backgroundColor:COLORS.bg },
   content:      { padding:16 },
   header:       { flexDirection:'row', justifyContent:'space-between', alignItems:'center', marginBottom:20 },
-  greeting:     { fontSize:20, fontWeight:'800', color:'#1e3a5f' },
-  month:        { fontSize:13, color:'#64748b', marginTop:2 },
-  logoutBtn:    { backgroundColor:'#fee2e2', paddingHorizontal:12, paddingVertical:6, borderRadius:8 },
-  logoutText:   { color:'#dc2626', fontSize:13, fontWeight:'600' },
-  loading:      { textAlign:'center', marginTop:40, color:'#64748b' },
+  greeting:     { fontSize:20, fontWeight:'800', color:COLORS.navy },
+  month:        { fontSize:13, color:COLORS.textMuted, marginTop:2 },
+  logoutBtn:    { backgroundColor:COLORS.redBg, paddingHorizontal:12, paddingVertical:6, borderRadius:8 },
+  logoutText:   { color:COLORS.red, fontSize:13, fontWeight:'600' },
+  loading:      { textAlign:'center', marginTop:40, color:COLORS.textMuted },
   statsGrid:    { flexDirection:'row', flexWrap:'wrap', gap:12, marginBottom:16 },
-  statCard:     { flex:1, minWidth:'40%', backgroundColor:'#fff', borderRadius:12, padding:16, alignItems:'center', elevation:2 },
+  statCard:     { flex:1, minWidth:'40%', backgroundColor:COLORS.white, borderRadius:12, padding:16, alignItems:'center', elevation:2 },
   statValue:    { fontSize:22, fontWeight:'800', marginBottom:4 },
-  statLabel:    { fontSize:12, color:'#64748b' },
-  primaryBtn:   { backgroundColor:'#2563eb', borderRadius:12, padding:16, alignItems:'center', marginBottom:10 },
-  primaryBtnText:{ color:'#fff', fontSize:16, fontWeight:'700' },
-  secondaryBtn: { backgroundColor:'#fff', borderRadius:12, padding:16, alignItems:'center', marginBottom:20, borderWidth:1, borderColor:'#e2e8f0' },
-  secondaryBtnText:{ color:'#1e3a5f', fontSize:16, fontWeight:'700' },
-  card:         { backgroundColor:'#fff', borderRadius:12, padding:16, elevation:2, marginBottom:16 },
-  cardTitle:    { fontSize:15, fontWeight:'700', color:'#1e3a5f', marginBottom:12 },
-  row:          { flexDirection:'row', justifyContent:'space-between', paddingVertical:6, borderBottomWidth:1, borderBottomColor:'#f1f5f9' },
-  rowCode:      { fontWeight:'700', color:'#2563eb', width:40 },
-  rowVal:       { color:'#374151', fontSize:13 },
+  statLabel:    { fontSize:12, color:COLORS.textMuted },
+  primaryBtn:   { backgroundColor:COLORS.blue, borderRadius:12, padding:16, alignItems:'center', marginBottom:10 },
+  primaryBtnText:{ color:COLORS.white, fontSize:16, fontWeight:'700' },
+  secondaryBtn: { backgroundColor:COLORS.white, borderRadius:12, padding:16, alignItems:'center', marginBottom:20, borderWidth:1, borderColor:COLORS.border },
+  secondaryBtnText:{ color:COLORS.navy, fontSize:16, fontWeight:'700' },
+  card:         { backgroundColor:COLORS.white, borderRadius:12, padding:16, elevation:2, marginBottom:16 },
+  cardTitle:    { fontSize:15, fontWeight:'700', color:COLORS.navy, marginBottom:12 },
+  row:          { flexDirection:'row', justifyContent:'space-between', paddingVertical:6, borderBottomWidth:1, borderBottomColor:COLORS.bgAlt },
+  rowCode:      { fontWeight:'700', color:COLORS.blue, width:40 },
+  rowVal:       { color:COLORS.text, fontSize:13 },
 });

@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import Papa from 'papaparse';
 import toast from 'react-hot-toast';
 import api from '../api/client';
+import colors from '../theme';
 
 const ENTITIES = {
   customers: {
@@ -48,25 +49,25 @@ const ENTITIES = {
 
 const s = {
   page:      { padding: 24 },
-  heading:   { fontSize: 22, fontWeight: 800, color: '#1e3a5f', marginBottom: 4 },
-  sub:       { color: '#64748b', fontSize: 14, marginBottom: 24 },
+  heading:   { fontSize: 22, fontWeight: 800, color: colors.navy, marginBottom: 4 },
+  sub:       { color: colors.textMuted, fontSize: 14, marginBottom: 24 },
   tabs:      { display: 'flex', gap: 8, marginBottom: 24, flexWrap: 'wrap' },
-  tab:       { padding: '8px 18px', borderRadius: 8, border: '1.5px solid #d1d5db', background: '#fff', cursor: 'pointer', fontSize: 14, fontWeight: 600, color: '#374151' },
-  tabActive: { background: '#2563eb', color: '#fff', borderColor: '#2563eb' },
-  card:      { background: '#fff', borderRadius: 12, padding: 24, boxShadow: '0 1px 8px rgba(0,0,0,.06)', marginBottom: 20 },
-  dropzone:  { border: '2px dashed #cbd5e1', borderRadius: 10, padding: 40, textAlign: 'center', cursor: 'pointer', background: '#f8fafc', transition: 'border-color .2s' },
-  dropHover: { borderColor: '#2563eb', background: '#eff6ff' },
-  dropText:  { color: '#64748b', fontSize: 15 },
-  dropBtn:   { display: 'inline-block', marginTop: 10, padding: '8px 20px', background: '#2563eb', color: '#fff', borderRadius: 8, cursor: 'pointer', fontSize: 13, fontWeight: 600 },
-  tplBtn:    { padding: '6px 14px', background: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: 6, cursor: 'pointer', fontSize: 12, fontWeight: 600, color: '#374151' },
+  tab:       { padding: '8px 18px', borderRadius: 8, border: `1.5px solid ${colors.borderInput}`, background: colors.white, cursor: 'pointer', fontSize: 14, fontWeight: 600, color: colors.text },
+  tabActive: { background: colors.blue, color: colors.white, borderColor: colors.blue },
+  card:      { background: colors.white, borderRadius: 12, padding: 24, boxShadow: '0 1px 8px rgba(0,0,0,.06)', marginBottom: 20 },
+  dropzone:  { border: '2px dashed #cbd5e1', borderRadius: 10, padding: 40, textAlign: 'center', cursor: 'pointer', background: colors.bgSlate, transition: 'border-color .2s' },
+  dropHover: { borderColor: colors.blue, background: '#eff6ff' },
+  dropText:  { color: colors.textMuted, fontSize: 15 },
+  dropBtn:   { display: 'inline-block', marginTop: 10, padding: '8px 20px', background: colors.blue, color: colors.white, borderRadius: 8, cursor: 'pointer', fontSize: 13, fontWeight: 600 },
+  tplBtn:    { padding: '6px 14px', background: colors.bgAlt, border: `1px solid ${colors.border}`, borderRadius: 6, cursor: 'pointer', fontSize: 12, fontWeight: 600, color: colors.text },
   table:     { width: '100%', borderCollapse: 'collapse', fontSize: 13, marginTop: 12 },
-  th:        { background: '#f1f5f9', padding: '8px 12px', textAlign: 'left', color: '#374151', fontWeight: 700, borderBottom: '2px solid #e2e8f0' },
-  td:        { padding: '7px 12px', borderBottom: '1px solid #f1f5f9', color: '#374151' },
+  th:        { background: colors.bgAlt, padding: '8px 12px', textAlign: 'left', color: colors.text, fontWeight: 700, borderBottom: `2px solid ${colors.border}` },
+  td:        { padding: '7px 12px', borderBottom: `1px solid ${colors.bgAlt}`, color: colors.text },
   actions:   { display: 'flex', gap: 10, marginTop: 16 },
-  importBtn: { padding: '10px 24px', background: '#16a34a', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer', fontSize: 14, fontWeight: 700 },
-  clearBtn:  { padding: '10px 20px', background: '#f1f5f9', border: '1px solid #e2e8f0', color: '#374151', borderRadius: 8, cursor: 'pointer', fontSize: 14, fontWeight: 600 },
+  importBtn: { padding: '10px 24px', background: colors.green, color: colors.white, border: 'none', borderRadius: 8, cursor: 'pointer', fontSize: 14, fontWeight: 700 },
+  clearBtn:  { padding: '10px 20px', background: colors.bgAlt, border: `1px solid ${colors.border}`, color: colors.text, borderRadius: 8, cursor: 'pointer', fontSize: 14, fontWeight: 600 },
   badge:     { display: 'inline-block', padding: '2px 8px', borderRadius: 12, fontSize: 11, fontWeight: 700 },
-  colHint:   { fontSize: 12, color: '#94a3b8', marginTop: 8 },
+  colHint:   { fontSize: 12, color: colors.textFaint, marginTop: 8 },
 };
 
 function downloadTemplate(entity) {
@@ -151,7 +152,7 @@ export default function Import() {
 
       <div style={s.card}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-          <span style={{ fontWeight: 700, color: '#1e3a5f' }}>Upload {cfg.label} CSV</span>
+          <span style={{ fontWeight: 700, color: colors.navy }}>Upload {cfg.label} CSV</span>
           <button style={s.tplBtn} onClick={() => downloadTemplate(entity)}>
             ⬇ Download Template
           </button>
@@ -179,10 +180,10 @@ export default function Import() {
       {rows.length > 0 && (
         <div style={s.card}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-            <span style={{ fontWeight: 700, color: '#1e3a5f' }}>
+            <span style={{ fontWeight: 700, color: colors.navy }}>
               Preview — {rows.length} rows
             </span>
-            <span style={{ ...s.badge, background: '#dbeafe', color: '#1d4ed8' }}>
+            <span style={{ ...s.badge, background: colors.blueBg, color: colors.blueDark }}>
               Ready to import
             </span>
           </div>
@@ -201,7 +202,7 @@ export default function Import() {
               </tbody>
             </table>
             {rows.length > 10 && (
-              <div style={{ textAlign: 'center', padding: 10, color: '#94a3b8', fontSize: 13 }}>
+              <div style={{ textAlign: 'center', padding: 10, color: colors.textFaint, fontSize: 13 }}>
                 + {rows.length - 10} more rows not shown
               </div>
             )}

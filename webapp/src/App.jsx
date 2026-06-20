@@ -1,40 +1,54 @@
+import { Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './hooks/useAuth';
 import Login from './pages/Login';
 import Layout from './components/Layout';
-import Dashboard from './pages/Dashboard';
-import LogActivity from './pages/LogActivity';
-import Logs from './pages/Logs';
-import Projects from './pages/Projects';
-import Engineers from './pages/Engineers';
-import Customers from './pages/Customers';
-import Analytics from './pages/Analytics';
-import Reports from './pages/Reports';
-import Import from './pages/Import';
+
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const LogActivity = lazy(() => import('./pages/LogActivity'));
+const Logs = lazy(() => import('./pages/Logs'));
+const Projects = lazy(() => import('./pages/Projects'));
+const Engineers = lazy(() => import('./pages/Engineers'));
+const Customers = lazy(() => import('./pages/Customers'));
+const Analytics = lazy(() => import('./pages/Analytics'));
+const Reports = lazy(() => import('./pages/Reports'));
+const Import = lazy(() => import('./pages/Import'));
+const Billing = lazy(() => import('./pages/Billing'));
+const Status = lazy(() => import('./pages/Status'));
+const Digest = lazy(() => import('./pages/Digest'));
 
 function RequireAuth({ children }) {
   const { isLoggedIn } = useAuth();
   return isLoggedIn ? children : <Navigate to="/login" replace />;
 }
 
+function PageFallback() {
+  return <div style={{ padding: 24, color: '#64748b', fontSize: 14 }}>Loading…</div>;
+}
+
 export default function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/" element={<RequireAuth><Layout /></RequireAuth>}>
-          <Route index element={<Dashboard />} />
-          <Route path="logs" element={<Logs />} />
-          <Route path="logs/new" element={<LogActivity />} />
-          <Route path="projects" element={<Projects />} />
-          <Route path="engineers" element={<Engineers />} />
-          <Route path="customers" element={<Customers />} />
-          <Route path="analytics" element={<Analytics />} />
-          <Route path="reports" element={<Reports />} />
-          <Route path="import" element={<Import />} />
-        </Route>
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+      <Suspense fallback={<PageFallback />}>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/" element={<RequireAuth><Layout /></RequireAuth>}>
+            <Route index element={<Dashboard />} />
+            <Route path="logs" element={<Logs />} />
+            <Route path="logs/new" element={<LogActivity />} />
+            <Route path="projects" element={<Projects />} />
+            <Route path="engineers" element={<Engineers />} />
+            <Route path="customers" element={<Customers />} />
+            <Route path="analytics" element={<Analytics />} />
+            <Route path="reports" element={<Reports />} />
+            <Route path="import" element={<Import />} />
+            <Route path="billing" element={<Billing />} />
+            <Route path="status" element={<Status />} />
+            <Route path="digest" element={<Digest />} />
+          </Route>
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Suspense>
     </BrowserRouter>
   );
 }

@@ -4,21 +4,22 @@ import { format } from 'date-fns';
 import toast from 'react-hot-toast';
 import { useLogs, useDeleteLog } from '../hooks/useLogs';
 import { useAuth } from '../hooks/useAuth';
+import colors from '../theme';
 
 const s = {
-  h1:      { fontSize:22, fontWeight:700, color:'#1e3a5f', marginBottom:16 },
+  h1:      { fontSize:22, fontWeight:700, color:colors.navy, marginBottom:16 },
   toolbar: { display:'flex', gap:12, marginBottom:16, flexWrap:'wrap', alignItems:'center' },
-  input:   { padding:'8px 12px', border:'1px solid #d1d5db', borderRadius:7, fontSize:13 },
-  btn:     { padding:'8px 16px', background:'#2563eb', color:'#fff', border:'none', borderRadius:7, fontSize:13, fontWeight:600, cursor:'pointer', textDecoration:'none', display:'inline-block' },
-  table:   { width:'100%', borderCollapse:'collapse', background:'#fff', borderRadius:10, overflow:'hidden', boxShadow:'0 1px 4px rgba(0,0,0,.08)' },
-  th:      { padding:'10px 14px', background:'#f8fafc', textAlign:'left', fontSize:12, fontWeight:700, color:'#64748b', borderBottom:'1px solid #e2e8f0', textTransform:'uppercase', letterSpacing:.5 },
-  td:      { padding:'10px 14px', fontSize:13, borderBottom:'1px solid #f1f5f9', color:'#374151' },
+  input:   { padding:'8px 12px', border:`1px solid ${colors.borderInput}`, borderRadius:7, fontSize:13 },
+  btn:     { padding:'8px 16px', background:colors.blue, color:colors.white, border:'none', borderRadius:7, fontSize:13, fontWeight:600, cursor:'pointer', textDecoration:'none', display:'inline-block' },
+  table:   { width:'100%', borderCollapse:'collapse', background:colors.white, borderRadius:10, overflow:'hidden', boxShadow:'0 1px 4px rgba(0,0,0,.08)' },
+  th:      { padding:'10px 14px', background:colors.bgSlate, textAlign:'left', fontSize:12, fontWeight:700, color:colors.textMuted, borderBottom:`1px solid ${colors.border}`, textTransform:'uppercase', letterSpacing:.5 },
+  td:      { padding:'10px 14px', fontSize:13, borderBottom:`1px solid ${colors.bgAlt}`, color:colors.text },
   badge:   { display:'inline-block', padding:'2px 8px', borderRadius:20, fontSize:11, fontWeight:600 },
-  delBtn:  { padding:'4px 10px', background:'#fee2e2', color:'#dc2626', border:'none', borderRadius:5, cursor:'pointer', fontSize:12 },
+  delBtn:  { padding:'4px 10px', background:colors.redBg, color:colors.red, border:'none', borderRadius:5, cursor:'pointer', fontSize:12 },
 };
 
-const activityColors = { PM:'#dbeafe', BD:'#fee2e2', IN:'#dcfce7', TR:'#fef9c3', SV:'#f3e8ff', OF:'#e0f2fe', TL:'#fce7f3', LV:'#f1f5f9' };
-const activityText   = { PM:'#1d4ed8', BD:'#dc2626', IN:'#16a34a', TR:'#ca8a04', SV:'#7c3aed', OF:'#0369a1', TL:'#be185d', LV:'#475569' };
+const activityColors = { PM:colors.blueBg, BD:colors.redBg, IN:colors.greenBg, TR:colors.amberBg, SV:colors.purpleBg, OF:'#e0f2fe', TL:'#fce7f3', LV:colors.bgAlt };
+const activityText   = { PM:colors.blueDark, BD:colors.red, IN:colors.green, TR:'#ca8a04', SV:colors.purple, OF:'#0369a1', TL:colors.pink, LV:'#475569' };
 
 export default function Logs() {
   const { user } = useAuth();
@@ -45,12 +46,12 @@ export default function Logs() {
 
       <div style={s.toolbar}>
         <input style={s.input} type="date" value={filters.date_from} onChange={e=>setFilters(f=>({...f,date_from:e.target.value}))} />
-        <span style={{ color:'#64748b' }}>to</span>
+        <span style={{ color:colors.textMuted }}>to</span>
         <input style={s.input} type="date" value={filters.date_to} onChange={e=>setFilters(f=>({...f,date_to:e.target.value}))} />
         {(filters.date_from||filters.date_to) && (
-          <button style={{ ...s.btn, background:'#64748b' }} onClick={()=>setFilters({date_from:'',date_to:''})}>Clear</button>
+          <button style={{ ...s.btn, background:colors.textMuted }} onClick={()=>setFilters({date_from:'',date_to:''})}>Clear</button>
         )}
-        <span style={{ marginLeft:'auto', color:'#64748b', fontSize:13 }}>
+        <span style={{ marginLeft:'auto', color:colors.textMuted, fontSize:13 }}>
           {data?.total ?? 0} records
         </span>
       </div>
@@ -67,7 +68,7 @@ export default function Logs() {
             </thead>
             <tbody>
               {data?.data?.length === 0 && (
-                <tr><td colSpan={9} style={{ ...s.td, textAlign:'center', color:'#94a3b8', padding:32 }}>No logs found</td></tr>
+                <tr><td colSpan={9} style={{ ...s.td, textAlign:'center', color:colors.textFaint, padding:32 }}>No logs found</td></tr>
               )}
               {data?.data?.map(log => (
                 <tr key={log.id}>
@@ -75,7 +76,7 @@ export default function Logs() {
                   <td style={s.td}>{log.engineer_name}</td>
                   <td style={s.td}>{log.customer_name || '—'}</td>
                   <td style={s.td}>
-                    <span style={{ ...s.badge, background:activityColors[log.activity_code]||'#f1f5f9', color:activityText[log.activity_code]||'#475569' }}>
+                    <span style={{ ...s.badge, background:activityColors[log.activity_code]||colors.bgAlt, color:activityText[log.activity_code]||'#475569' }}>
                       {log.activity_code}
                     </span>
                   </td>

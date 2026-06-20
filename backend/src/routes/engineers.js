@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs');
 const db = require('../db');
 const auth = require('../middleware/auth');
 const tenant = require('../middleware/tenant');
+const PLANS = require('../config/plans');
 
 router.use(auth, tenant);
 
@@ -51,6 +52,20 @@ router.post('/', async (req, res) => {
   }
 
   try {
+    const { rows: [tenantRow] } = await db.query(`SELECT plan FROM tenants WHERE id=$1`, [req.tenantId]);
+    const planCfg = PLANS[tenantRow?.plan] || PLANS.starter;
+    if (planCfg.seatCap !== Infinity) {
+      const { rows: [{ count }] } = await db.query(
+        `SELECT COUNT(*) FROM users WHERE tenant_id=$1 AND active=true`,
+        [req.tenantId]
+      );
+      if (Number(count) >= planCfg.seatCap) {
+        return res.status(402).json({
+          error: `Seat limit reached for the ${planCfg.label} plan. Upgrade to add more team members.`,
+        });
+      }
+    }
+
     const hash = await bcrypt.hash(password, 12);
     const { rows } = await db.query(
       `INSERT INTO users (tenant_id, name, email, password_hash, role, dept, reports_to)

@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { View, Text, FlatList, StyleSheet, RefreshControl } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import api from '../api/client';
+import COLORS from '../theme';
 
 const STATUS_COLORS = {
   Planned:'#dbeafe', 'In Progress':'#dcfce7', Completed:'#f0fdf4',
@@ -57,11 +58,11 @@ export default function ProjectsScreen() {
 }
 
 const s = StyleSheet.create({
-  container: { flex:1, backgroundColor:'#f0f4ff' },
+  container: { flex:1, backgroundColor:COLORS.bg },
   center:    { flex:1, alignItems:'center', justifyContent:'center', padding:32 },
-  card:      { backgroundColor:'#fff', borderRadius:12, padding:16, marginBottom:10, elevation:2 },
+  card:      { backgroundColor:COLORS.white, borderRadius:12, padding:16, marginBottom:10, elevation:2 },
   badge:     { alignSelf:'flex-start', paddingHorizontal:10, paddingVertical:3, borderRadius:20, marginBottom:8 },
   badgeText: { fontSize:12, fontWeight:'700' },
-  name:      { fontSize:15, fontWeight:'700', color:'#1e3a5f', marginBottom:6 },
-  meta:      { fontSize:13, color:'#64748b', marginBottom:3 },
+  name:      { fontSize:15, fontWeight:'700', color:COLORS.navy, marginBottom:6 },
+  meta:      { fontSize:13, color:COLORS.textMuted, marginBottom:3 },
 });

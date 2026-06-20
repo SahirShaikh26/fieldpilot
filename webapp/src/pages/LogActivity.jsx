@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import { format } from 'date-fns';
 import { useCreateLog } from '../hooks/useLogs';
 import api from '../api/client';
+import colors from '../theme';
 
 const ACTIVITY_CODES = [
   { code:'PM',  label:'PM — Preventive Maintenance' },
@@ -19,16 +20,16 @@ const ACTIVITY_CODES = [
 
 const s = {
   page:  { maxWidth:640 },
-  h1:    { fontSize:22, fontWeight:700, color:'#1e3a5f', marginBottom:24 },
-  card:  { background:'#fff', borderRadius:10, padding:28, boxShadow:'0 1px 4px rgba(0,0,0,.08)' },
+  h1:    { fontSize:22, fontWeight:700, color:colors.navy, marginBottom:24 },
+  card:  { background:colors.white, borderRadius:10, padding:28, boxShadow:'0 1px 4px rgba(0,0,0,.08)' },
   row:   { display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))', gap:16, marginBottom:16 },
   group: { marginBottom:16 },
-  label: { display:'block', fontSize:13, fontWeight:600, color:'#374151', marginBottom:5 },
-  input: { width:'100%', padding:'9px 12px', border:'1px solid #d1d5db', borderRadius:7, fontSize:14 },
-  select:{ width:'100%', padding:'9px 12px', border:'1px solid #d1d5db', borderRadius:7, fontSize:14 },
-  textarea:{ width:'100%', padding:'9px 12px', border:'1px solid #d1d5db', borderRadius:7, fontSize:14, resize:'vertical' },
-  btn:   { padding:'10px 24px', background:'#2563eb', color:'#fff', border:'none', borderRadius:7, fontSize:14, fontWeight:600, cursor:'pointer' },
-  btnSecondary: { padding:'10px 24px', background:'#f1f5f9', color:'#374151', border:'none', borderRadius:7, fontSize:14, cursor:'pointer', marginRight:12 },
+  label: { display:'block', fontSize:13, fontWeight:600, color:colors.text, marginBottom:5 },
+  input: { width:'100%', padding:'9px 12px', border:`1px solid ${colors.borderInput}`, borderRadius:7, fontSize:14 },
+  select:{ width:'100%', padding:'9px 12px', border:`1px solid ${colors.borderInput}`, borderRadius:7, fontSize:14 },
+  textarea:{ width:'100%', padding:'9px 12px', border:`1px solid ${colors.borderInput}`, borderRadius:7, fontSize:14, resize:'vertical' },
+  btn:   { padding:'10px 24px', background:colors.blue, color:colors.white, border:'none', borderRadius:7, fontSize:14, fontWeight:600, cursor:'pointer' },
+  btnSecondary: { padding:'10px 24px', background:colors.bgAlt, color:colors.text, border:'none', borderRadius:7, fontSize:14, cursor:'pointer', marginRight:12 },
 };
 
 export default function LogActivity() {

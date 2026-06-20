@@ -3,23 +3,24 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import api from '../api/client';
 import { useAuth } from '../hooks/useAuth';
+import colors from '../theme';
 
-const ROLE_COLORS = { Director:'#dbeafe', Manager:'#dcfce7', Engineer:'#f3e8ff' };
-const ROLE_TEXT   = { Director:'#1d4ed8', Manager:'#16a34a', Engineer:'#7c3aed' };
+const ROLE_COLORS = { Director:colors.blueBg, Manager:colors.greenBg, Engineer:colors.purpleBg };
+const ROLE_TEXT   = { Director:colors.blueDark, Manager:colors.green, Engineer:colors.purple };
 
 const s = {
-  h1:    { fontSize:22, fontWeight:700, color:'#1e3a5f', marginBottom:20 },
+  h1:    { fontSize:22, fontWeight:700, color:colors.navy, marginBottom:20 },
   grid:  { display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(240px,1fr))', gap:16 },
-  card:  { background:'#fff', borderRadius:10, padding:20, boxShadow:'0 1px 4px rgba(0,0,0,.08)' },
+  card:  { background:colors.white, borderRadius:10, padding:20, boxShadow:'0 1px 4px rgba(0,0,0,.08)' },
   badge: { display:'inline-block', padding:'3px 10px', borderRadius:20, fontSize:11, fontWeight:700, marginBottom:10 },
-  name:  { fontSize:16, fontWeight:700, color:'#1e3a5f', marginBottom:4 },
-  meta:  { fontSize:13, color:'#64748b', marginBottom:3 },
-  btn:   { padding:'8px 16px', background:'#2563eb', color:'#fff', border:'none', borderRadius:7, fontSize:13, fontWeight:600, cursor:'pointer' },
+  name:  { fontSize:16, fontWeight:700, color:colors.navy, marginBottom:4 },
+  meta:  { fontSize:13, color:colors.textMuted, marginBottom:3 },
+  btn:   { padding:'8px 16px', background:colors.blue, color:colors.white, border:'none', borderRadius:7, fontSize:13, fontWeight:600, cursor:'pointer' },
   modal: { position:'fixed', inset:0, background:'rgba(0,0,0,.4)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:100 },
-  mcard: { background:'#fff', borderRadius:12, padding:32, width:'min(440px, calc(100vw - 32px))', maxHeight:'90vh', overflowY:'auto' },
-  label: { display:'block', fontSize:13, fontWeight:600, color:'#374151', marginBottom:5 },
-  input: { width:'100%', padding:'9px 12px', border:'1px solid #d1d5db', borderRadius:7, fontSize:14, marginBottom:12 },
-  select:{ width:'100%', padding:'9px 12px', border:'1px solid #d1d5db', borderRadius:7, fontSize:14, marginBottom:12 },
+  mcard: { background:colors.white, borderRadius:12, padding:32, width:'min(440px, calc(100vw - 32px))', maxHeight:'90vh', overflowY:'auto' },
+  label: { display:'block', fontSize:13, fontWeight:600, color:colors.text, marginBottom:5 },
+  input: { width:'100%', padding:'9px 12px', border:`1px solid ${colors.borderInput}`, borderRadius:7, fontSize:14, marginBottom:12 },
+  select:{ width:'100%', padding:'9px 12px', border:`1px solid ${colors.borderInput}`, borderRadius:7, fontSize:14, marginBottom:12 },
 };
 
 const EMPTY = { name:'', email:'', password:'', role:'Engineer', dept:'', reports_to:'' };
@@ -52,12 +53,12 @@ export default function Engineers() {
         <div style={s.grid}>
           {data?.map(e=>(
             <div key={e.id} style={s.card}>
-              <span style={{ ...s.badge, background:ROLE_COLORS[e.role]||'#f1f5f9', color:ROLE_TEXT[e.role]||'#475569' }}>{e.role}</span>
+              <span style={{ ...s.badge, background:ROLE_COLORS[e.role]||colors.bgAlt, color:ROLE_TEXT[e.role]||'#475569' }}>{e.role}</span>
               <div style={s.name}>{e.name}</div>
               <div style={s.meta}>✉️ {e.email}</div>
               {e.dept && <div style={s.meta}>🏢 {e.dept}</div>}
               <div style={{ ...s.meta, marginTop:8 }}>
-                <span style={{ padding:'2px 8px', borderRadius:20, fontSize:11, background:e.active?'#dcfce7':'#fee2e2', color:e.active?'#16a34a':'#dc2626', fontWeight:600 }}>
+                <span style={{ padding:'2px 8px', borderRadius:20, fontSize:11, background:e.active?colors.greenBg:colors.redBg, color:e.active?colors.green:colors.red, fontWeight:600 }}>
                   {e.active ? 'Active' : 'Inactive'}
                 </span>
               </div>
@@ -86,7 +87,7 @@ export default function Engineers() {
               <label style={s.label}>Department</label>
               <input style={s.input} value={form.dept} onChange={set('dept')} placeholder="e.g. Field Service" />
               <div style={{ display:'flex', gap:10, marginTop:8 }}>
-                <button type="button" style={{ ...s.btn, background:'#f1f5f9', color:'#374151' }} onClick={()=>setModal(false)}>Cancel</button>
+                <button type="button" style={{ ...s.btn, background:colors.bgAlt, color:colors.text }} onClick={()=>setModal(false)}>Cancel</button>
                 <button type="submit" style={s.btn} disabled={create.isPending}>{create.isPending?'Creating…':'Create User'}</button>
               </div>
             </form>

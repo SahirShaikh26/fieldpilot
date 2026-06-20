@@ -11,6 +11,7 @@
       "resizeMode": "contain",
       "backgroundColor": "#2563eb"
     },
+    "jsEngine": "hermes",
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.yourcompany.fieldpilot"
@@ -35,7 +36,16 @@
           "locationAlwaysAndWhenInUsePermission": "FieldPilot needs location for check-in."
         }
       ],
-      "expo-document-picker"
+      "expo-document-picker",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "enableProguardInReleaseBuilds": true,
+            "enableShrinkResourcesInReleaseBuilds": true
+          }
+        }
+      ]
     ],
     "extra": {
       "eas": {

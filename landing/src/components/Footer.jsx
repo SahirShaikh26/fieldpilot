@@ -1,0 +1,21 @@
+import { LOGIN_URL, SIGNUP_URL } from '../config';
+
+export default function Footer() {
+  return (
+    <footer className="footer">
+      <div className="container">
+        <div className="footer-inner">
+          <div className="logo">⚡ FieldPilot</div>
+          <div className="footer-links">
+            <a href="#features">Features</a>
+            <a href="#pricing">Pricing</a>
+            <a href={LOGIN_URL}>Log In</a>
+            <a href={SIGNUP_URL}>Start Free Trial</a>
+            <a href="mailto:hello@fieldpilot.app">Contact</a>
+          </div>
+        </div>
+        <div className="footer-bottom">© {new Date().getFullYear()} FieldPilot. All rights reserved.</div>
+      </div>
+    </footer>
+  );
+}

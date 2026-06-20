@@ -4,29 +4,30 @@ import toast from 'react-hot-toast';
 import { format } from 'date-fns';
 import api from '../api/client';
 import { useAuth } from '../hooks/useAuth';
+import colors from '../theme';
 
 const STATUS_COLORS = {
-  Planned:'#dbeafe', 'In Progress':'#dcfce7', Completed:'#f0fdf4',
-  'On Hold':'#fef9c3', Cancelled:'#fee2e2',
+  Planned:colors.blueBg, 'In Progress':colors.greenBg, Completed:'#f0fdf4',
+  'On Hold':colors.amberBg, Cancelled:colors.redBg,
 };
 const STATUS_TEXT = {
-  Planned:'#1d4ed8', 'In Progress':'#16a34a', Completed:'#15803d',
-  'On Hold':'#ca8a04', Cancelled:'#dc2626',
+  Planned:colors.blueDark, 'In Progress':colors.green, Completed:'#15803d',
+  'On Hold':'#ca8a04', Cancelled:colors.red,
 };
 
 const s = {
-  h1:    { fontSize:22, fontWeight:700, color:'#1e3a5f', marginBottom:20 },
+  h1:    { fontSize:22, fontWeight:700, color:colors.navy, marginBottom:20 },
   grid:  { display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(300px,1fr))', gap:16 },
-  card:  { background:'#fff', borderRadius:10, padding:20, boxShadow:'0 1px 4px rgba(0,0,0,.08)' },
+  card:  { background:colors.white, borderRadius:10, padding:20, boxShadow:'0 1px 4px rgba(0,0,0,.08)' },
   badge: { display:'inline-block', padding:'3px 10px', borderRadius:20, fontSize:12, fontWeight:600, marginBottom:12 },
-  name:  { fontSize:16, fontWeight:700, color:'#1e3a5f', marginBottom:6 },
-  meta:  { fontSize:13, color:'#64748b', marginBottom:4 },
-  btn:   { padding:'8px 16px', background:'#2563eb', color:'#fff', border:'none', borderRadius:7, fontSize:13, fontWeight:600, cursor:'pointer' },
+  name:  { fontSize:16, fontWeight:700, color:colors.navy, marginBottom:6 },
+  meta:  { fontSize:13, color:colors.textMuted, marginBottom:4 },
+  btn:   { padding:'8px 16px', background:colors.blue, color:colors.white, border:'none', borderRadius:7, fontSize:13, fontWeight:600, cursor:'pointer' },
   modal: { position:'fixed', inset:0, background:'rgba(0,0,0,.4)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:100 },
-  mcard: { background:'#fff', borderRadius:12, padding:32, width:'min(480px, calc(100vw - 32px))', maxHeight:'90vh', overflowY:'auto' },
-  input: { width:'100%', padding:'9px 12px', border:'1px solid #d1d5db', borderRadius:7, fontSize:14, marginBottom:12 },
-  select:{ width:'100%', padding:'9px 12px', border:'1px solid #d1d5db', borderRadius:7, fontSize:14, marginBottom:12 },
-  label: { display:'block', fontSize:13, fontWeight:600, color:'#374151', marginBottom:5 },
+  mcard: { background:colors.white, borderRadius:12, padding:32, width:'min(480px, calc(100vw - 32px))', maxHeight:'90vh', overflowY:'auto' },
+  input: { width:'100%', padding:'9px 12px', border:`1px solid ${colors.borderInput}`, borderRadius:7, fontSize:14, marginBottom:12 },
+  select:{ width:'100%', padding:'9px 12px', border:`1px solid ${colors.borderInput}`, borderRadius:7, fontSize:14, marginBottom:12 },
+  label: { display:'block', fontSize:13, fontWeight:600, color:colors.text, marginBottom:5 },
   row:   { display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 },
 };
 
@@ -64,21 +65,21 @@ export default function Projects() {
         <div style={s.grid}>
           {projects?.map(p => (
             <div key={p.id} style={s.card}>
-              <span style={{ ...s.badge, background:STATUS_COLORS[p.status]||'#f1f5f9', color:STATUS_TEXT[p.status]||'#475569' }}>{p.status}</span>
+              <span style={{ ...s.badge, background:STATUS_COLORS[p.status]||colors.bgAlt, color:STATUS_TEXT[p.status]||'#475569' }}>{p.status}</span>
               <div style={s.name}>{p.name}</div>
               <div style={s.meta}>🏭 {p.customer_name || 'No customer'}</div>
               <div style={s.meta}>👷 {p.engineer_name || 'Unassigned'}</div>
               {p.value_inr && <div style={s.meta}>💰 ₹{Number(p.value_inr).toLocaleString('en-IN')}</div>}
               {p.start_date && <div style={s.meta}>📅 {format(new Date(p.start_date),'dd MMM yyyy')}{p.end_date ? ` → ${format(new Date(p.end_date),'dd MMM yyyy')}` : ''}</div>}
               {canEdit && (
-                <button style={{ ...s.btn, background:'#f8fafc', color:'#374151', marginTop:12, fontSize:12, padding:'6px 14px' }}
+                <button style={{ ...s.btn, background:colors.bgSlate, color:colors.text, marginTop:12, fontSize:12, padding:'6px 14px' }}
                   onClick={()=>{ setForm({...p, start_date:p.start_date?.split('T')[0]||'', end_date:p.end_date?.split('T')[0]||''}); setModal(true); }}>
                   Edit
                 </button>
               )}
             </div>
           ))}
-          {projects?.length === 0 && <p style={{ color:'#94a3b8' }}>No projects yet.</p>}
+          {projects?.length === 0 && <p style={{ color:colors.textFaint }}>No projects yet.</p>}
         </div>
       )}
 
@@ -128,7 +129,7 @@ export default function Projects() {
                 </div>
               </div>
               <div style={{ display:'flex', gap:10, marginTop:8 }}>
-                <button type="button" style={{ ...s.btn, background:'#f1f5f9', color:'#374151' }} onClick={()=>setModal(false)}>Cancel</button>
+                <button type="button" style={{ ...s.btn, background:colors.bgAlt, color:colors.text }} onClick={()=>setModal(false)}>Cancel</button>
                 <button type="submit" style={s.btn} disabled={save.isPending}>{save.isPending ? 'Saving…' : 'Save'}</button>
               </div>
             </form>

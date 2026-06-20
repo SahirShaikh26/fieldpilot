@@ -1,9 +1,11 @@
 require('dotenv').config();
+require('./sentry');
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const db = require('./db');
+const errorLogger = require('./middleware/errorLogger');
 
 const authRoutes = require('./routes/auth');
 const logsRoutes = require('./routes/logs');
@@ -12,6 +14,10 @@ const customersRoutes = require('./routes/customers');
 const engineersRoutes = require('./routes/engineers');
 const reportsRoutes = require('./routes/reports');
 const importRoutes = require('./routes/import');
+const billingRoutes = require('./routes/billing');
+const billingWebhookRoutes = require('./routes/billingWebhook');
+const statusRoutes = require('./routes/status');
+const digestRoutes = require('./routes/digest');
 
 async function migrate() {
   const stmts = [
@@ -22,10 +28,20 @@ async function migrate() {
     `CREATE TABLE IF NOT EXISTS projects (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), tenant_id UUID REFERENCES tenants(id) ON DELETE CASCADE, name VARCHAR(200) NOT NULL, customer_id UUID REFERENCES customers(id), engineer_id UUID REFERENCES users(id), status VARCHAR(30) DEFAULT 'Planned', category VARCHAR(30), product_type VARCHAR(50), value_inr DECIMAL(14,2), start_date DATE, end_date DATE)`,
     `CREATE TABLE IF NOT EXISTS activity_logs (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), tenant_id UUID REFERENCES tenants(id) ON DELETE CASCADE, engineer_id UUID REFERENCES users(id), customer_id UUID REFERENCES customers(id), machine_id UUID REFERENCES machines(id), project_id UUID REFERENCES projects(id), date DATE NOT NULL DEFAULT CURRENT_DATE, activity_code VARCHAR(5) NOT NULL, query_type VARCHAR(80), product_type VARCHAR(50), hours DECIMAL(5,1), billing_inr DECIMAL(12,2) DEFAULT 0, cost_inr DECIMAL(12,2) DEFAULT 0, status VARCHAR(30), location VARCHAR(40), notes TEXT, submitted_at TIMESTAMP DEFAULT NOW())`,
     `CREATE TABLE IF NOT EXISTS attendance (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), engineer_id UUID REFERENCES users(id) ON DELETE CASCADE, date DATE NOT NULL, check_in TIMESTAMP, check_out TIMESTAMP, location VARCHAR(40), lat DECIMAL(10,7), lng DECIMAL(10,7), UNIQUE(engineer_id, date))`,
+    `CREATE TABLE IF NOT EXISTS error_events (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), tenant_id UUID REFERENCES tenants(id) ON DELETE SET NULL, route VARCHAR(255), method VARCHAR(10), status_code INTEGER, message TEXT, stack TEXT, created_at TIMESTAMP DEFAULT NOW())`,
+    `CREATE TABLE IF NOT EXISTS digests (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), tenant_id UUID REFERENCES tenants(id) ON DELETE CASCADE, period_type VARCHAR(10) NOT NULL, period_start DATE NOT NULL, period_end DATE NOT NULL, summary TEXT, anomalies JSONB DEFAULT '[]', customer_blurb TEXT, generated_by UUID REFERENCES users(id), created_at TIMESTAMP DEFAULT NOW())`,
+    `ALTER TABLE tenants DROP COLUMN IF EXISTS stripe_customer_id`,
+    `ALTER TABLE tenants DROP COLUMN IF EXISTS stripe_subscription_id`,
+    `ALTER TABLE tenants ADD COLUMN IF NOT EXISTS razorpay_customer_id VARCHAR(100)`,
+    `ALTER TABLE tenants ADD COLUMN IF NOT EXISTS razorpay_subscription_id VARCHAR(100)`,
+    `ALTER TABLE tenants ADD COLUMN IF NOT EXISTS plan_status VARCHAR(20) DEFAULT 'trialing'`,
+    `ALTER TABLE tenants ADD COLUMN IF NOT EXISTS trial_ends_at TIMESTAMP`,
     `CREATE INDEX IF NOT EXISTS idx_logs_tenant_date ON activity_logs(tenant_id, date DESC)`,
     `CREATE INDEX IF NOT EXISTS idx_logs_engineer ON activity_logs(engineer_id)`,
     `CREATE INDEX IF NOT EXISTS idx_projects_tenant ON projects(tenant_id)`,
     `CREATE INDEX IF NOT EXISTS idx_customers_tenant ON customers(tenant_id)`,
+    `CREATE INDEX IF NOT EXISTS idx_error_events_created ON error_events(created_at DESC)`,
+    `CREATE INDEX IF NOT EXISTS idx_digests_tenant_created ON digests(tenant_id, created_at DESC)`,
   ];
   for (const sql of stmts) {
     await db.query(sql).catch(e => console.warn('Migration warning:', e.message));
@@ -38,6 +54,11 @@ const app = express();
 app.use(helmet());
 app.use(cors());
 app.use(morgan('dev'));
+
+// Razorpay webhook needs the raw, untouched body for signature verification —
+// must be mounted before express.json().
+app.use('/api/billing/webhook', express.raw({ type: 'application/json' }), billingWebhookRoutes);
+
 app.use(express.json());
 
 app.use('/api/auth', authRoutes);
@@ -47,13 +68,21 @@ app.use('/api/customers', customersRoutes);
 app.use('/api/engineers', engineersRoutes);
 app.use('/api/reports', reportsRoutes);
 app.use('/api/import', importRoutes);
+app.use('/api/billing', billingRoutes);
+app.use('/api/status', statusRoutes);
+app.use('/api/digest', digestRoutes);
 
-app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
-
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ error: 'Internal server error' });
+app.get('/api/health', async (req, res) => {
+  const start = Date.now();
+  try {
+    await db.query('SELECT 1');
+    res.json({ status: 'ok', db: 'connected', latency_ms: Date.now() - start });
+  } catch (err) {
+    res.status(503).json({ status: 'error', db: 'disconnected' });
+  }
 });
+
+app.use(errorLogger);
 
 const PORT = process.env.PORT || 4000;
 migrate().then(() => {

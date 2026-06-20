@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { View, Text, FlatList, StyleSheet, TouchableOpacity, RefreshControl } from 'react-native';
 import { format } from 'date-fns';
 import api from '../api/client';
+import COLORS from '../theme';
 
 const ACT_COLOR = { PM:'#dbeafe', BD:'#fee2e2', IN:'#dcfce7', TR:'#fef9c3', SV:'#f3e8ff', OF:'#e0f2fe', TL:'#fce7f3', LV:'#f1f5f9' };
 const ACT_TEXT  = { PM:'#1d4ed8', BD:'#dc2626', IN:'#16a34a', TR:'#ca8a04', SV:'#7c3aed', OF:'#0369a1', TL:'#be185d', LV:'#475569' };
@@ -59,17 +60,17 @@ export default function LogsScreen() {
 }
 
 const s = StyleSheet.create({
-  container:   { flex:1, backgroundColor:'#f0f4ff' },
+  container:   { flex:1, backgroundColor:COLORS.bg },
   center:      { flex:1, alignItems:'center', justifyContent:'center', padding:32 },
-  empty:       { color:'#94a3b8', textAlign:'center' },
-  card:        { backgroundColor:'#fff', borderRadius:12, padding:14, marginBottom:10, elevation:2 },
+  empty:       { color:COLORS.textFaint, textAlign:'center' },
+  card:        { backgroundColor:COLORS.white, borderRadius:12, padding:14, marginBottom:10, elevation:2 },
   cardHeader:  { flexDirection:'row', justifyContent:'space-between', alignItems:'center', marginBottom:6 },
-  date:        { fontWeight:'700', color:'#1e3a5f', fontSize:14 },
+  date:        { fontWeight:'700', color:COLORS.navy, fontSize:14 },
   badge:       { paddingHorizontal:10, paddingVertical:3, borderRadius:20 },
   badgeText:   { fontSize:12, fontWeight:'700' },
-  customer:    { color:'#64748b', fontSize:13, marginBottom:6 },
+  customer:    { color:COLORS.textMuted, fontSize:13, marginBottom:6 },
   cardFooter:  { flexDirection:'row', gap:12 },
-  meta:        { fontSize:13, color:'#2563eb', fontWeight:'600' },
-  status:      { fontSize:12, color:'#64748b', backgroundColor:'#f1f5f9', paddingHorizontal:8, paddingVertical:2, borderRadius:10 },
-  notes:       { marginTop:6, fontSize:12, color:'#64748b', fontStyle:'italic' },
+  meta:        { fontSize:13, color:COLORS.blue, fontWeight:'600' },
+  status:      { fontSize:12, color:COLORS.textMuted, backgroundColor:COLORS.bgAlt, paddingHorizontal:8, paddingVertical:2, borderRadius:10 },
+  notes:       { marginTop:6, fontSize:12, color:COLORS.textMuted, fontStyle:'italic' },
 });

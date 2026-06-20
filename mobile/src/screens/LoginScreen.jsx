@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import { useAuth } from '../hooks/useAuth';
+import COLORS from '../theme';
 
 export default function LoginScreen() {
   const { login } = useAuth();
@@ -38,12 +39,12 @@ export default function LoginScreen() {
 }
 
 const s = StyleSheet.create({
-  container: { flex:1, backgroundColor:'#f0f4ff', justifyContent:'center', alignItems:'center', padding:20 },
-  card:      { backgroundColor:'#fff', borderRadius:16, padding:32, width:'100%', maxWidth:380, shadowColor:'#000', shadowOpacity:.1, shadowRadius:12, elevation:4 },
-  logo:      { fontSize:26, fontWeight:'800', color:'#1e3a5f', textAlign:'center', marginBottom:4 },
-  sub:       { fontSize:14, color:'#64748b', textAlign:'center', marginBottom:28 },
-  input:     { borderWidth:1, borderColor:'#d1d5db', borderRadius:8, padding:12, fontSize:15, marginBottom:14, color:'#1e293b' },
-  btn:       { backgroundColor:'#2563eb', borderRadius:8, padding:14, alignItems:'center', marginTop:4 },
+  container: { flex:1, backgroundColor:COLORS.bg, justifyContent:'center', alignItems:'center', padding:20 },
+  card:      { backgroundColor:COLORS.white, borderRadius:16, padding:32, width:'100%', maxWidth:380, shadowColor:COLORS.black, shadowOpacity:.1, shadowRadius:12, elevation:4 },
+  logo:      { fontSize:26, fontWeight:'800', color:COLORS.navy, textAlign:'center', marginBottom:4 },
+  sub:       { fontSize:14, color:COLORS.textMuted, textAlign:'center', marginBottom:28 },
+  input:     { borderWidth:1, borderColor:COLORS.borderInput, borderRadius:8, padding:12, fontSize:15, marginBottom:14, color:COLORS.textDark },
+  btn:       { backgroundColor:COLORS.blue, borderRadius:8, padding:14, alignItems:'center', marginTop:4 },
   btnDisabled:{ opacity:.6 },
-  btnText:   { color:'#fff', fontSize:16, fontWeight:'700' },
+  btnText:   { color:COLORS.white, fontSize:16, fontWeight:'700' },
 });

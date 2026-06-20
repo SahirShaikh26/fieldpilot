@@ -6,9 +6,10 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
 } from 'recharts';
 import api from '../api/client';
+import colors from '../theme';
 
-const COLORS = ['#2563eb','#059669','#d97706','#7c3aed','#dc2626','#0891b2','#be185d'];
-const card = { background:'#fff', borderRadius:10, padding:20, boxShadow:'0 1px 4px rgba(0,0,0,.08)' };
+const COLORS = [colors.blue,'#059669',colors.amber,colors.purple,colors.red,colors.cyan,colors.pink];
+const card = { background:colors.white, borderRadius:10, padding:20, boxShadow:'0 1px 4px rgba(0,0,0,.08)' };
 
 export default function Analytics() {
   const [dateFrom, setDateFrom] = useState(format(startOfMonth(subMonths(new Date(),5)), 'yyyy-MM-dd'));
@@ -20,10 +21,10 @@ export default function Analytics() {
   });
 
   const s = {
-    h1:    { fontSize:22, fontWeight:700, color:'#1e3a5f', marginBottom:4 },
+    h1:    { fontSize:22, fontWeight:700, color:colors.navy, marginBottom:4 },
     filter:{ display:'flex', gap:12, alignItems:'center', marginBottom:24, flexWrap:'wrap' },
-    label: { fontSize:13, color:'#64748b' },
-    input: { padding:'7px 12px', border:'1px solid #d1d5db', borderRadius:7, fontSize:13 },
+    label: { fontSize:13, color:colors.textMuted },
+    input: { padding:'7px 12px', border:`1px solid ${colors.borderInput}`, borderRadius:7, fontSize:13 },
     grid:  { display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))', gap:20, marginBottom:20 },
   };
 
@@ -49,7 +50,7 @@ export default function Analytics() {
                   <XAxis dataKey="month" tick={{ fontSize:11 }} />
                   <YAxis tick={{ fontSize:11 }} />
                   <Tooltip formatter={v=>`₹${Number(v).toLocaleString('en-IN')}`} />
-                  <Bar dataKey="billing" fill="#2563eb" radius={[3,3,0,0]} />
+                  <Bar dataKey="billing" fill={colors.blue} radius={[3,3,0,0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -78,7 +79,7 @@ export default function Analytics() {
                 <YAxis tick={{ fontSize:11 }} />
                 <Tooltip formatter={v=>`₹${Number(v).toLocaleString('en-IN')}`} />
                 <Legend />
-                <Bar dataKey="billing" name="Billing (₹)" fill="#2563eb" radius={[3,3,0,0]} />
+                <Bar dataKey="billing" name="Billing (₹)" fill={colors.blue} radius={[3,3,0,0]} />
                 <Bar dataKey="hours" name="Hours" fill="#059669" radius={[3,3,0,0]} />
               </BarChart>
             </ResponsiveContainer>
@@ -90,13 +91,13 @@ export default function Analytics() {
             <div style={{ overflowX:'auto' }}>
             <table style={{ width:'100%', borderCollapse:'collapse', fontSize:13 }}>
               <thead>
-                <tr style={{ borderBottom:'2px solid #e2e8f0' }}>
-                  {['Code','Count','Hours','Billing'].map(h=><th key={h} style={{ textAlign:'left', padding:'8px 12px', color:'#64748b', fontWeight:600 }}>{h}</th>)}
+                <tr style={{ borderBottom:`2px solid ${colors.border}` }}>
+                  {['Code','Count','Hours','Billing'].map(h=><th key={h} style={{ textAlign:'left', padding:'8px 12px', color:colors.textMuted, fontWeight:600 }}>{h}</th>)}
                 </tr>
               </thead>
               <tbody>
                 {(data?.by_activity||[]).map(a=>(
-                  <tr key={a.activity_code} style={{ borderBottom:'1px solid #f1f5f9' }}>
+                  <tr key={a.activity_code} style={{ borderBottom:`1px solid ${colors.bgAlt}` }}>
                     <td style={{ padding:'8px 12px', fontWeight:700 }}>{a.activity_code}</td>
                     <td style={{ padding:'8px 12px' }}>{a.count}</td>
                     <td style={{ padding:'8px 12px' }}>{Number(a.hours||0).toFixed(1)}</td>
