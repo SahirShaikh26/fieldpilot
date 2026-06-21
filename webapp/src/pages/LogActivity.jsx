@@ -7,17 +7,6 @@ import { useCreateLog } from '../hooks/useLogs';
 import api from '../api/client';
 import colors from '../theme';
 
-const ACTIVITY_CODES = [
-  { code:'PM',  label:'PM — Preventive Maintenance' },
-  { code:'BD',  label:'BD — Breakdown' },
-  { code:'IN',  label:'IN — Installation' },
-  { code:'TR',  label:'TR — Training' },
-  { code:'SV',  label:'SV — Site Visit' },
-  { code:'OF',  label:'OF — Office Work' },
-  { code:'TL',  label:'TL — Travel' },
-  { code:'LV',  label:'LV — Leave' },
-];
-
 const s = {
   page:  { maxWidth:640 },
   h1:    { fontSize:22, fontWeight:700, color:colors.navy, marginBottom:24 },
@@ -38,6 +27,7 @@ export default function LogActivity() {
 
   const { data: customers } = useQuery({ queryKey:['customers'], queryFn:()=>api.get('/customers').then(r=>r.data) });
   const { data: projects }  = useQuery({ queryKey:['projects'],  queryFn:()=>api.get('/projects').then(r=>r.data) });
+  const { data: activityTypes } = useQuery({ queryKey:['activity-types'], queryFn:()=>api.get('/activity-types').then(r=>r.data) });
 
   const [form, setForm] = useState({
     date: format(new Date(), 'yyyy-MM-dd'),
@@ -81,7 +71,7 @@ export default function LogActivity() {
               <label style={s.label}>Activity Code *</label>
               <select style={s.select} value={form.activity_code} onChange={set('activity_code')} required>
                 <option value="">Select…</option>
-                {ACTIVITY_CODES.map(a => <option key={a.code} value={a.code}>{a.label}</option>)}
+                {activityTypes?.map(a => <option key={a.id} value={a.code}>{a.code} — {a.label}</option>)}
               </select>
             </div>
           </div>

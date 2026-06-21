@@ -61,6 +61,18 @@ router.post('/register-tenant', async (req, res) => {
        VALUES ($1, $2, $3, $4, 'Director')`,
       [tenant.id, admin_name, admin_email, hash]
     );
+    await db.query(
+      `INSERT INTO activity_types (tenant_id, code, label, color, sort_order) VALUES
+         ($1,'PM','Preventive Maintenance','#1d4ed8',1),
+         ($1,'BD','Breakdown','#dc2626',2),
+         ($1,'IN','Installation','#16a34a',3),
+         ($1,'TR','Training','#ca8a04',4),
+         ($1,'SV','Site Visit','#7c3aed',5),
+         ($1,'OF','Office Work','#0369a1',6),
+         ($1,'TL','Travel','#be185d',7),
+         ($1,'LV','Leave','#475569',8)`,
+      [tenant.id]
+    );
     await db.query('COMMIT');
 
     // No Razorpay customer pre-creation needed — customer_id attaches

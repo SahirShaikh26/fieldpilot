@@ -20,6 +20,7 @@ const statusRoutes = require('./routes/status');
 const digestRoutes = require('./routes/digest');
 const visitsRoutes = require('./routes/visits');
 const tenantRoutes = require('./routes/tenant');
+const activityTypesRoutes = require('./routes/activityTypes');
 
 async function migrate() {
   const stmts = [
@@ -33,6 +34,9 @@ async function migrate() {
     `CREATE TABLE IF NOT EXISTS error_events (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), tenant_id UUID REFERENCES tenants(id) ON DELETE SET NULL, route VARCHAR(255), method VARCHAR(10), status_code INTEGER, message TEXT, stack TEXT, created_at TIMESTAMP DEFAULT NOW())`,
     `CREATE TABLE IF NOT EXISTS digests (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), tenant_id UUID REFERENCES tenants(id) ON DELETE CASCADE, period_type VARCHAR(10) NOT NULL, period_start DATE NOT NULL, period_end DATE NOT NULL, summary TEXT, anomalies JSONB DEFAULT '[]', customer_blurb TEXT, generated_by UUID REFERENCES users(id), created_at TIMESTAMP DEFAULT NOW())`,
     `CREATE TABLE IF NOT EXISTS visits (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), tenant_id UUID REFERENCES tenants(id) ON DELETE CASCADE, engineer_id UUID REFERENCES users(id), customer_id UUID REFERENCES customers(id), machine_id UUID REFERENCES machines(id), project_id UUID REFERENCES projects(id), scheduled_date DATE NOT NULL, notes TEXT, status VARCHAR(20) DEFAULT 'Scheduled', created_by UUID REFERENCES users(id), created_at TIMESTAMP DEFAULT NOW())`,
+    `CREATE TABLE IF NOT EXISTS activity_types (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), tenant_id UUID REFERENCES tenants(id) ON DELETE CASCADE, code VARCHAR(10) NOT NULL, label VARCHAR(100) NOT NULL, color VARCHAR(7) DEFAULT '#2563eb', sort_order INTEGER DEFAULT 0, created_at TIMESTAMP DEFAULT NOW())`,
+    `CREATE TABLE IF NOT EXISTS recurring_visit_templates (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), tenant_id UUID REFERENCES tenants(id) ON DELETE CASCADE, engineer_id UUID REFERENCES users(id), customer_id UUID REFERENCES customers(id), machine_id UUID REFERENCES machines(id), project_id UUID REFERENCES projects(id), notes TEXT, frequency VARCHAR(20) CHECK (frequency IN ('weekly','monthly','quarterly')), active BOOLEAN DEFAULT true, created_by UUID REFERENCES users(id), created_at TIMESTAMP DEFAULT NOW())`,
+    `ALTER TABLE visits ADD COLUMN IF NOT EXISTS template_id UUID REFERENCES recurring_visit_templates(id)`,
     `ALTER TABLE activity_logs ADD COLUMN IF NOT EXISTS visit_id UUID REFERENCES visits(id)`,
     `ALTER TABLE activity_logs ADD COLUMN IF NOT EXISTS photo_urls JSONB DEFAULT '[]'`,
     `ALTER TABLE tenants DROP COLUMN IF EXISTS stripe_customer_id`,
@@ -42,6 +46,23 @@ async function migrate() {
     `ALTER TABLE tenants ADD COLUMN IF NOT EXISTS plan_status VARCHAR(20) DEFAULT 'trialing'`,
     `ALTER TABLE tenants ADD COLUMN IF NOT EXISTS trial_ends_at TIMESTAMP`,
     `ALTER TABLE tenants ADD COLUMN IF NOT EXISTS photo_capture_enabled BOOLEAN DEFAULT false`,
+    // Seed default activity types for any tenant that doesn't have any yet —
+    // covers existing tenants on first migrate() after this column was added,
+    // and is a no-op for tenants that already have a customized list.
+    `INSERT INTO activity_types (tenant_id, code, label, color, sort_order)
+     SELECT t.id, v.code, v.label, v.color, v.sort_order
+     FROM tenants t
+     CROSS JOIN (VALUES
+       ('PM','Preventive Maintenance','#1d4ed8',1),
+       ('BD','Breakdown','#dc2626',2),
+       ('IN','Installation','#16a34a',3),
+       ('TR','Training','#ca8a04',4),
+       ('SV','Site Visit','#7c3aed',5),
+       ('OF','Office Work','#0369a1',6),
+       ('TL','Travel','#be185d',7),
+       ('LV','Leave','#475569',8)
+     ) AS v(code, label, color, sort_order)
+     WHERE NOT EXISTS (SELECT 1 FROM activity_types at2 WHERE at2.tenant_id = t.id)`,
     `CREATE INDEX IF NOT EXISTS idx_logs_tenant_date ON activity_logs(tenant_id, date DESC)`,
     `CREATE INDEX IF NOT EXISTS idx_logs_engineer ON activity_logs(engineer_id)`,
     `CREATE INDEX IF NOT EXISTS idx_projects_tenant ON projects(tenant_id)`,
@@ -50,6 +71,8 @@ async function migrate() {
     `CREATE INDEX IF NOT EXISTS idx_digests_tenant_created ON digests(tenant_id, created_at DESC)`,
     `CREATE INDEX IF NOT EXISTS idx_visits_tenant_date ON visits(tenant_id, scheduled_date)`,
     `CREATE INDEX IF NOT EXISTS idx_visits_engineer ON visits(engineer_id)`,
+    `CREATE INDEX IF NOT EXISTS idx_activity_types_tenant ON activity_types(tenant_id)`,
+    `CREATE INDEX IF NOT EXISTS idx_recurring_templates_tenant ON recurring_visit_templates(tenant_id)`,
   ];
   for (const sql of stmts) {
     await db.query(sql).catch(e => console.warn('Migration warning:', e.message));
@@ -81,6 +104,7 @@ app.use('/api/status', statusRoutes);
 app.use('/api/digest', digestRoutes);
 app.use('/api/visits', visitsRoutes);
 app.use('/api/tenant', tenantRoutes);
+app.use('/api/activity-types', activityTypesRoutes);
 
 app.get('/api/health', async (req, res) => {
   const start = Date.now();

@@ -4,11 +4,9 @@ import { format } from 'date-fns';
 import api from '../api/client';
 import COLORS from '../theme';
 
-const ACT_COLOR = { PM:'#dbeafe', BD:'#fee2e2', IN:'#dcfce7', TR:'#fef9c3', SV:'#f3e8ff', OF:'#e0f2fe', TL:'#fce7f3', LV:'#f1f5f9' };
-const ACT_TEXT  = { PM:'#1d4ed8', BD:'#dc2626', IN:'#16a34a', TR:'#ca8a04', SV:'#7c3aed', OF:'#0369a1', TL:'#be185d', LV:'#475569' };
-
 export default function LogsScreen() {
   const [logs, setLogs] = useState([]);
+  const [activityTypes, setActivityTypes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -24,14 +22,19 @@ export default function LogsScreen() {
     }
   }, []);
 
-  useEffect(() => { fetchLogs(); }, []);
+  useEffect(() => {
+    fetchLogs();
+    api.get('/activity-types').then(r => setActivityTypes(r.data)).catch(() => {});
+  }, []);
+
+  const typeFor = (code) => activityTypes.find(t => t.code === code);
 
   const renderItem = ({ item: log }) => (
     <View style={s.card}>
       <View style={s.cardHeader}>
         <Text style={s.date}>{format(new Date(log.date), 'dd MMM yyyy')}</Text>
-        <View style={[s.badge, { backgroundColor: ACT_COLOR[log.activity_code]||'#f1f5f9' }]}>
-          <Text style={[s.badgeText, { color: ACT_TEXT[log.activity_code]||'#475569' }]}>{log.activity_code}</Text>
+        <View style={[s.badge, { backgroundColor: typeFor(log.activity_code)?.color ? `${typeFor(log.activity_code).color}1A` : '#f1f5f9' }]}>
+          <Text style={[s.badgeText, { color: typeFor(log.activity_code)?.color || '#475569' }]}>{log.activity_code}</Text>
         </View>
       </View>
       {log.customer_name && <Text style={s.customer}>🏭 {log.customer_name}</Text>}

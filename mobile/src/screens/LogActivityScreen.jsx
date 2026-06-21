@@ -13,22 +13,12 @@ import COLORS from '../theme';
 
 const LANG_STORAGE_KEY = 'fp_dictation_lang';
 
-const ACTIVITY_CODES = [
-  { code:'PM', label:'PM — Preventive Maintenance' },
-  { code:'BD', label:'BD — Breakdown' },
-  { code:'IN', label:'IN — Installation' },
-  { code:'TR', label:'TR — Training' },
-  { code:'SV', label:'SV — Site Visit' },
-  { code:'OF', label:'OF — Office Work' },
-  { code:'TL', label:'TL — Travel' },
-  { code:'LV', label:'LV — Leave' },
-];
-
 export default function LogActivityScreen({ navigation, route }) {
   const { submit } = useOfflineQueue();
   const visit = route?.params?.visit;
   const [customers, setCustomers] = useState([]);
   const [projects, setProjects] = useState([]);
+  const [activityTypes, setActivityTypes] = useState([]);
   const [saving, setSaving] = useState(false);
   const [photos, setPhotos] = useState([]); // { uri, uploading, url }
   const [photoCaptureEnabled, setPhotoCaptureEnabled] = useState(false);
@@ -37,7 +27,7 @@ export default function LogActivityScreen({ navigation, route }) {
   const wasListening = useRef(false);
   const [form, setForm] = useState({
     date: format(new Date(), 'yyyy-MM-dd'),
-    activity_code: 'SV',
+    activity_code: '',
     customer_id: visit?.customer_id || '',
     project_id: visit?.project_id || '',
     query_type: '',
@@ -54,6 +44,10 @@ export default function LogActivityScreen({ navigation, route }) {
     api.get('/customers').then(r => setCustomers(r.data)).catch(() => {});
     api.get('/projects').then(r => setProjects(r.data)).catch(() => {});
     api.get('/tenant').then(r => setPhotoCaptureEnabled(!!r.data.photo_capture_enabled)).catch(() => {});
+    api.get('/activity-types').then(r => {
+      setActivityTypes(r.data);
+      if (r.data.length) setForm(f => (f.activity_code ? f : { ...f, activity_code: r.data[0].code }));
+    }).catch(() => {});
     AsyncStorage.getItem(LANG_STORAGE_KEY).then((saved) => { if (saved) setDictationLang(saved); }).catch(() => {});
   }, []);
 
@@ -149,7 +143,7 @@ export default function LogActivityScreen({ navigation, route }) {
       <Field label="Activity Code *">
         <View style={s.pickerWrap}>
           <Picker selectedValue={form.activity_code} onValueChange={set('activity_code')}>
-            {ACTIVITY_CODES.map(a => <Picker.Item key={a.code} label={a.label} value={a.code} />)}
+            {activityTypes.map(a => <Picker.Item key={a.id} label={`${a.code} — ${a.label}`} value={a.code} />)}
           </Picker>
         </View>
       </Field>

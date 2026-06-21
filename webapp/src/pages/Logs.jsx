@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import toast from 'react-hot-toast';
 import { useLogs, useDeleteLog } from '../hooks/useLogs';
 import { useAuth } from '../hooks/useAuth';
+import api from '../api/client';
 import colors from '../theme';
 
 const s = {
@@ -18,14 +20,13 @@ const s = {
   delBtn:  { padding:'4px 10px', background:colors.redBg, color:colors.red, border:'none', borderRadius:5, cursor:'pointer', fontSize:12 },
 };
 
-const activityColors = { PM:colors.blueBg, BD:colors.redBg, IN:colors.greenBg, TR:colors.amberBg, SV:colors.purpleBg, OF:'#e0f2fe', TL:'#fce7f3', LV:colors.bgAlt };
-const activityText   = { PM:colors.blueDark, BD:colors.red, IN:colors.green, TR:'#ca8a04', SV:colors.purple, OF:'#0369a1', TL:colors.pink, LV:'#475569' };
-
 export default function Logs() {
   const { user } = useAuth();
   const deleteLog = useDeleteLog();
   const [filters, setFilters] = useState({ date_from:'', date_to:'' });
   const { data, isLoading } = useLogs(filters);
+  const { data: activityTypes } = useQuery({ queryKey:['activity-types'], queryFn:()=>api.get('/activity-types').then(r=>r.data) });
+  const activityTypeMap = Object.fromEntries((activityTypes || []).map(t => [t.code, t]));
 
   const handleDelete = async (id) => {
     if (!confirm('Delete this log?')) return;
@@ -76,7 +77,11 @@ export default function Logs() {
                   <td style={s.td}>{log.engineer_name}</td>
                   <td style={s.td}>{log.customer_name || '—'}</td>
                   <td style={s.td}>
-                    <span style={{ ...s.badge, background:activityColors[log.activity_code]||colors.bgAlt, color:activityText[log.activity_code]||'#475569' }}>
+                    <span style={{
+                      ...s.badge,
+                      background: activityTypeMap[log.activity_code] ? `${activityTypeMap[log.activity_code].color}1A` : colors.bgAlt,
+                      color: activityTypeMap[log.activity_code]?.color || '#475569',
+                    }}>
                       {log.activity_code}
                     </span>
                   </td>
