@@ -16,6 +16,8 @@ const Import = lazy(() => import('./pages/Import'));
 const Billing = lazy(() => import('./pages/Billing'));
 const Status = lazy(() => import('./pages/Status'));
 const Digest = lazy(() => import('./pages/Digest'));
+const Schedule = lazy(() => import('./pages/Schedule'));
+const Settings = lazy(() => import('./pages/Settings'));
 
 function RequireAuth({ children }) {
   const { isLoggedIn } = useAuth();
@@ -45,6 +47,8 @@ export default function App() {
             <Route path="billing" element={<Billing />} />
             <Route path="status" element={<Status />} />
             <Route path="digest" element={<Digest />} />
+            <Route path="schedule" element={<Schedule />} />
+            <Route path="settings" element={<Settings />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

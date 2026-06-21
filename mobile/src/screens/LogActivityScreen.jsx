@@ -1,9 +1,17 @@
-import { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert, Platform } from 'react-native';
+import { useState, useEffect, useRef } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert, Platform, Image } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
+import * as ImagePicker from 'expo-image-picker';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { format } from 'date-fns';
 import api from '../api/client';
+import { useOfflineQueue } from '../hooks/useOfflineQueue';
+import { uploadPhoto } from '../api/cloudinary';
+import { useSpeechToText } from '../hooks/useSpeechToText';
+import { SPEECH_LANGUAGES } from '../constants/languages';
 import COLORS from '../theme';
+
+const LANG_STORAGE_KEY = 'fp_dictation_lang';
 
 const ACTIVITY_CODES = [
   { code:'PM', label:'PM — Preventive Maintenance' },
@@ -16,15 +24,22 @@ const ACTIVITY_CODES = [
   { code:'LV', label:'LV — Leave' },
 ];
 
-export default function LogActivityScreen({ navigation }) {
+export default function LogActivityScreen({ navigation, route }) {
+  const { submit } = useOfflineQueue();
+  const visit = route?.params?.visit;
   const [customers, setCustomers] = useState([]);
   const [projects, setProjects] = useState([]);
   const [saving, setSaving] = useState(false);
+  const [photos, setPhotos] = useState([]); // { uri, uploading, url }
+  const [photoCaptureEnabled, setPhotoCaptureEnabled] = useState(false);
+  const [dictationLang, setDictationLang] = useState('hi-IN');
+  const { transcript, listening, error: speechError, start: startListening, stop: stopListening } = useSpeechToText(dictationLang);
+  const wasListening = useRef(false);
   const [form, setForm] = useState({
     date: format(new Date(), 'yyyy-MM-dd'),
     activity_code: 'SV',
-    customer_id: '',
-    project_id: '',
+    customer_id: visit?.customer_id || '',
+    project_id: visit?.project_id || '',
     query_type: '',
     product_type: '',
     hours: '',
@@ -32,22 +47,79 @@ export default function LogActivityScreen({ navigation }) {
     cost_inr: '',
     status: '',
     location: '',
-    notes: '',
+    notes: visit?.notes || '',
   });
 
   useEffect(() => {
     api.get('/customers').then(r => setCustomers(r.data)).catch(() => {});
     api.get('/projects').then(r => setProjects(r.data)).catch(() => {});
+    api.get('/tenant').then(r => setPhotoCaptureEnabled(!!r.data.photo_capture_enabled)).catch(() => {});
+    AsyncStorage.getItem(LANG_STORAGE_KEY).then((saved) => { if (saved) setDictationLang(saved); }).catch(() => {});
   }, []);
 
+  useEffect(() => {
+    // Append the finalized transcript to Notes once recognition stops.
+    if (wasListening.current && !listening && transcript) {
+      setForm((f) => ({ ...f, notes: f.notes ? `${f.notes} ${transcript}` : transcript }));
+    }
+    wasListening.current = listening;
+  }, [listening, transcript]);
+
+  useEffect(() => {
+    if (speechError) Alert.alert('Voice input error', speechError);
+  }, [speechError]);
+
+  const changeDictationLang = (code) => {
+    setDictationLang(code);
+    AsyncStorage.setItem(LANG_STORAGE_KEY, code).catch(() => {});
+  };
+
   const set = (k) => (v) => setForm(f => ({ ...f, [k]: v }));
+
+  const addPhoto = async (fromCamera) => {
+    const perm = fromCamera
+      ? await ImagePicker.requestCameraPermissionsAsync()
+      : await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (perm.status !== 'granted') {
+      Alert.alert('Permission needed', `Allow ${fromCamera ? 'camera' : 'photo library'} access to attach photos.`);
+      return;
+    }
+
+    const result = fromCamera
+      ? await ImagePicker.launchCameraAsync({ quality: 0.6 })
+      : await ImagePicker.launchImageLibraryAsync({ quality: 0.6 });
+    if (result.canceled) return;
+
+    const uri = result.assets[0].uri;
+    const entry = { uri, uploading: true, url: null };
+    setPhotos((p) => [...p, entry]);
+
+    try {
+      const url = await uploadPhoto(uri);
+      setPhotos((p) => p.map((ph) => (ph.uri === uri ? { ...ph, uploading: false, url } : ph)));
+    } catch (err) {
+      setPhotos((p) => p.filter((ph) => ph.uri !== uri));
+      Alert.alert('Upload failed', err.message === 'Photo upload is not configured'
+        ? 'Photo upload is not set up yet.'
+        : 'Could not upload photo — check your connection and try again.');
+    }
+  };
+
+  const removePhoto = (uri) => setPhotos((p) => p.filter((ph) => ph.uri !== uri));
 
   const handleSave = async () => {
     if (!form.activity_code) { Alert.alert('Required', 'Select an activity code'); return; }
     setSaving(true);
     try {
-      await api.post('/logs', form);
-      Alert.alert('Saved!', 'Activity logged successfully', [{ text:'OK', onPress:()=>navigation.navigate('Logs') }]);
+      const photo_urls = photos.filter((p) => p.url).map((p) => p.url);
+      const base = { ...form, photo_urls };
+      const payload = visit ? { ...base, visit_id: visit.id, machine_id: visit.machine_id } : base;
+      const { queued } = await submit('/logs', payload);
+      Alert.alert(
+        queued ? 'Saved offline' : 'Saved!',
+        queued ? 'No connection — this log will sync automatically once you\'re back online.' : 'Activity logged successfully',
+        [{ text:'OK', onPress:()=>navigation.navigate('Logs') }]
+      );
     } catch (err) {
       Alert.alert('Error', err.response?.data?.error || 'Could not save');
     } finally {
@@ -64,6 +136,12 @@ export default function LogActivityScreen({ navigation }) {
 
   return (
     <ScrollView style={s.container} contentContainerStyle={s.content} keyboardShouldPersistTaps="handled">
+      {visit && (
+        <View style={s.visitBanner}>
+          <Text style={s.visitBannerText}>📍 Logging scheduled visit — {visit.customer_name}</Text>
+        </View>
+      )}
+
       <Field label="Date">
         <TextInput style={s.input} value={form.date} onChangeText={set('date')} placeholder="YYYY-MM-DD" />
       </Field>
@@ -119,7 +197,45 @@ export default function LogActivityScreen({ navigation }) {
       <Field label="Notes">
         <TextInput style={[s.input, s.textarea]} value={form.notes} onChangeText={set('notes')}
           placeholder="Describe what was done…" multiline numberOfLines={3} textAlignVertical="top" />
+        <View style={s.dictationRow}>
+          <View style={[s.pickerWrap, s.dictationPicker]}>
+            <Picker selectedValue={dictationLang} onValueChange={changeDictationLang}>
+              {SPEECH_LANGUAGES.map((l) => <Picker.Item key={l.code} label={l.label} value={l.code} />)}
+            </Picker>
+          </View>
+          <TouchableOpacity
+            style={[s.micBtn, listening && s.micBtnActive]}
+            onPress={() => (listening ? stopListening() : startListening())}
+          >
+            <Text style={s.micBtnText}>{listening ? '⏹ Stop' : '🎤 Dictate'}</Text>
+          </TouchableOpacity>
+        </View>
+        {listening && transcript ? <Text style={s.liveTranscript}>{transcript}</Text> : null}
       </Field>
+
+      {photoCaptureEnabled && (
+        <Field label="Photos">
+          <View style={s.photoRow}>
+            {photos.map((p) => (
+              <View key={p.uri} style={s.photoThumbWrap}>
+                <Image source={{ uri: p.uri }} style={s.photoThumb} />
+                {p.uploading && <View style={s.photoOverlay}><Text style={s.photoOverlayText}>…</Text></View>}
+                <TouchableOpacity style={s.photoRemove} onPress={() => removePhoto(p.uri)}>
+                  <Text style={s.photoRemoveText}>✕</Text>
+                </TouchableOpacity>
+              </View>
+            ))}
+          </View>
+          <View style={s.row}>
+            <TouchableOpacity style={[s.photoBtn, s.half]} onPress={() => addPhoto(true)}>
+              <Text style={s.photoBtnText}>📷 Camera</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={[s.photoBtn, s.half]} onPress={() => addPhoto(false)}>
+              <Text style={s.photoBtnText}>🖼 Gallery</Text>
+            </TouchableOpacity>
+          </View>
+        </Field>
+      )}
 
       <TouchableOpacity style={[s.btn, saving && s.btnDisabled]} onPress={handleSave} disabled={saving}>
         <Text style={s.btnText}>{saving ? 'Saving…' : 'Save Log'}</Text>
@@ -141,4 +257,21 @@ const s = StyleSheet.create({
   btn:        { backgroundColor:COLORS.blue, borderRadius:12, padding:16, alignItems:'center', marginTop:8 },
   btnDisabled:{ opacity:.6 },
   btnText:    { color:COLORS.white, fontSize:16, fontWeight:'700' },
+  visitBanner:{ backgroundColor:COLORS.blueBg, borderRadius:8, padding:10, marginBottom:14 },
+  visitBannerText:{ fontSize:13, fontWeight:'600', color:COLORS.blueDark },
+  photoRow:   { flexDirection:'row', flexWrap:'wrap', gap:8, marginBottom:10 },
+  photoThumbWrap:{ width:64, height:64, borderRadius:8, overflow:'hidden' },
+  photoThumb: { width:64, height:64, borderRadius:8 },
+  photoOverlay:{ position:'absolute', inset:0, backgroundColor:'rgba(0,0,0,.4)', alignItems:'center', justifyContent:'center' },
+  photoOverlayText:{ color:COLORS.white, fontWeight:'700' },
+  photoRemove:{ position:'absolute', top:2, right:2, backgroundColor:'rgba(0,0,0,.6)', width:18, height:18, borderRadius:9, alignItems:'center', justifyContent:'center' },
+  photoRemoveText:{ color:COLORS.white, fontSize:11, fontWeight:'700' },
+  photoBtn:   { backgroundColor:COLORS.white, borderWidth:1, borderColor:COLORS.borderInput, borderRadius:8, padding:11, alignItems:'center' },
+  photoBtnText:{ color:COLORS.navy, fontSize:13, fontWeight:'600' },
+  dictationRow:{ flexDirection:'row', gap:8, marginTop:8, alignItems:'center' },
+  dictationPicker:{ flex:1 },
+  micBtn:     { backgroundColor:COLORS.purpleBg, borderRadius:8, paddingHorizontal:14, paddingVertical:11 },
+  micBtnActive:{ backgroundColor:COLORS.redBg },
+  micBtnText: { color:COLORS.purple, fontSize:13, fontWeight:'700' },
+  liveTranscript:{ marginTop:6, fontSize:13, color:COLORS.textMuted, fontStyle:'italic' },
 });

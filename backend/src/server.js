@@ -18,6 +18,8 @@ const billingRoutes = require('./routes/billing');
 const billingWebhookRoutes = require('./routes/billingWebhook');
 const statusRoutes = require('./routes/status');
 const digestRoutes = require('./routes/digest');
+const visitsRoutes = require('./routes/visits');
+const tenantRoutes = require('./routes/tenant');
 
 async function migrate() {
   const stmts = [
@@ -30,18 +32,24 @@ async function migrate() {
     `CREATE TABLE IF NOT EXISTS attendance (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), engineer_id UUID REFERENCES users(id) ON DELETE CASCADE, date DATE NOT NULL, check_in TIMESTAMP, check_out TIMESTAMP, location VARCHAR(40), lat DECIMAL(10,7), lng DECIMAL(10,7), UNIQUE(engineer_id, date))`,
     `CREATE TABLE IF NOT EXISTS error_events (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), tenant_id UUID REFERENCES tenants(id) ON DELETE SET NULL, route VARCHAR(255), method VARCHAR(10), status_code INTEGER, message TEXT, stack TEXT, created_at TIMESTAMP DEFAULT NOW())`,
     `CREATE TABLE IF NOT EXISTS digests (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), tenant_id UUID REFERENCES tenants(id) ON DELETE CASCADE, period_type VARCHAR(10) NOT NULL, period_start DATE NOT NULL, period_end DATE NOT NULL, summary TEXT, anomalies JSONB DEFAULT '[]', customer_blurb TEXT, generated_by UUID REFERENCES users(id), created_at TIMESTAMP DEFAULT NOW())`,
+    `CREATE TABLE IF NOT EXISTS visits (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), tenant_id UUID REFERENCES tenants(id) ON DELETE CASCADE, engineer_id UUID REFERENCES users(id), customer_id UUID REFERENCES customers(id), machine_id UUID REFERENCES machines(id), project_id UUID REFERENCES projects(id), scheduled_date DATE NOT NULL, notes TEXT, status VARCHAR(20) DEFAULT 'Scheduled', created_by UUID REFERENCES users(id), created_at TIMESTAMP DEFAULT NOW())`,
+    `ALTER TABLE activity_logs ADD COLUMN IF NOT EXISTS visit_id UUID REFERENCES visits(id)`,
+    `ALTER TABLE activity_logs ADD COLUMN IF NOT EXISTS photo_urls JSONB DEFAULT '[]'`,
     `ALTER TABLE tenants DROP COLUMN IF EXISTS stripe_customer_id`,
     `ALTER TABLE tenants DROP COLUMN IF EXISTS stripe_subscription_id`,
     `ALTER TABLE tenants ADD COLUMN IF NOT EXISTS razorpay_customer_id VARCHAR(100)`,
     `ALTER TABLE tenants ADD COLUMN IF NOT EXISTS razorpay_subscription_id VARCHAR(100)`,
     `ALTER TABLE tenants ADD COLUMN IF NOT EXISTS plan_status VARCHAR(20) DEFAULT 'trialing'`,
     `ALTER TABLE tenants ADD COLUMN IF NOT EXISTS trial_ends_at TIMESTAMP`,
+    `ALTER TABLE tenants ADD COLUMN IF NOT EXISTS photo_capture_enabled BOOLEAN DEFAULT false`,
     `CREATE INDEX IF NOT EXISTS idx_logs_tenant_date ON activity_logs(tenant_id, date DESC)`,
     `CREATE INDEX IF NOT EXISTS idx_logs_engineer ON activity_logs(engineer_id)`,
     `CREATE INDEX IF NOT EXISTS idx_projects_tenant ON projects(tenant_id)`,
     `CREATE INDEX IF NOT EXISTS idx_customers_tenant ON customers(tenant_id)`,
     `CREATE INDEX IF NOT EXISTS idx_error_events_created ON error_events(created_at DESC)`,
     `CREATE INDEX IF NOT EXISTS idx_digests_tenant_created ON digests(tenant_id, created_at DESC)`,
+    `CREATE INDEX IF NOT EXISTS idx_visits_tenant_date ON visits(tenant_id, scheduled_date)`,
+    `CREATE INDEX IF NOT EXISTS idx_visits_engineer ON visits(engineer_id)`,
   ];
   for (const sql of stmts) {
     await db.query(sql).catch(e => console.warn('Migration warning:', e.message));
@@ -71,6 +79,8 @@ app.use('/api/import', importRoutes);
 app.use('/api/billing', billingRoutes);
 app.use('/api/status', statusRoutes);
 app.use('/api/digest', digestRoutes);
+app.use('/api/visits', visitsRoutes);
+app.use('/api/tenant', tenantRoutes);
 
 app.get('/api/health', async (req, res) => {
   const start = Date.now();

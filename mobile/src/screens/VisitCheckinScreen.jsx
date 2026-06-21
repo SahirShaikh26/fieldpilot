@@ -3,9 +3,11 @@ import { View, Text, TouchableOpacity, StyleSheet, Alert, ScrollView, ActivityIn
 import * as Location from 'expo-location';
 import { format } from 'date-fns';
 import api from '../api/client';
+import { useOfflineQueue } from '../hooks/useOfflineQueue';
 import COLORS from '../theme';
 
 export default function VisitCheckinScreen() {
+  const { submit } = useOfflineQueue();
   const [attendance, setAttendance] = useState(null);
   const [loading, setLoading] = useState(false);
   const [locLoading, setLocLoading] = useState(false);
@@ -49,13 +51,18 @@ export default function VisitCheckinScreen() {
     setLoading(true);
     const loc = await getLocation();
     try {
-      const { data } = await api.post('/engineers/attendance/checkin', {
+      const { queued, data } = await submit('/engineers/attendance/checkin', {
         lat: loc?.lat,
         lng: loc?.lng,
         location: 'Field',
       });
-      setTodayRecord(data);
-      Alert.alert('Checked In!', `Check-in recorded at ${format(new Date(data.check_in), 'hh:mm a')}`);
+      if (queued) {
+        setTodayRecord({ check_in: new Date().toISOString(), check_out: null });
+        Alert.alert('Checked In (offline)', "No connection — this will sync automatically once you're back online.");
+      } else {
+        setTodayRecord(data);
+        Alert.alert('Checked In!', `Check-in recorded at ${format(new Date(data.check_in), 'hh:mm a')}`);
+      }
     } catch (err) {
       Alert.alert('Error', err.response?.data?.error || 'Check-in failed');
     } finally {
@@ -66,9 +73,14 @@ export default function VisitCheckinScreen() {
   const handleCheckOut = async () => {
     setLoading(true);
     try {
-      const { data } = await api.post('/engineers/attendance/checkout');
-      setTodayRecord(data);
-      Alert.alert('Checked Out!', `Check-out recorded at ${format(new Date(data.check_out), 'hh:mm a')}`);
+      const { queued, data } = await submit('/engineers/attendance/checkout', {});
+      if (queued) {
+        setTodayRecord((r) => ({ ...r, check_out: new Date().toISOString() }));
+        Alert.alert('Checked Out (offline)', "No connection — this will sync automatically once you're back online.");
+      } else {
+        setTodayRecord(data);
+        Alert.alert('Checked Out!', `Check-out recorded at ${format(new Date(data.check_out), 'hh:mm a')}`);
+      }
     } catch (err) {
       Alert.alert('Error', err.response?.data?.error || 'Check-out failed');
     } finally {

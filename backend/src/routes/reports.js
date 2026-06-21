@@ -123,6 +123,24 @@ router.get('/export/csv', async (req, res) => {
   }
 });
 
+// GET /api/reports/maintenance-due  — machines with warranty expiring within 30 days
+router.get('/maintenance-due', async (req, res) => {
+  try {
+    const { rows } = await db.query(
+      `SELECT m.id, m.name AS machine, c.name AS customer, m.warranty_until
+       FROM machines m JOIN customers c ON c.id = m.customer_id
+       WHERE c.tenant_id=$1 AND m.warranty_until IS NOT NULL
+         AND m.warranty_until BETWEEN CURRENT_DATE AND (CURRENT_DATE + INTERVAL '30 days')
+       ORDER BY m.warranty_until ASC`,
+      [req.tenantId]
+    );
+    res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 // GET /api/reports/attendance
 router.get('/attendance', async (req, res) => {
   const { month, engineer_id } = req.query;

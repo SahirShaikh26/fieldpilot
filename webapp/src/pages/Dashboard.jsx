@@ -24,6 +24,11 @@ export default function Dashboard() {
     queryFn: () => api.get('/reports/summary', { params: { date_from: dateFrom } }).then(r => r.data),
   });
 
+  const { data: maintenanceDue } = useQuery({
+    queryKey: ['maintenance-due'],
+    queryFn: () => api.get('/reports/maintenance-due').then(r => r.data),
+  });
+
   const t = data?.totals;
 
   return (
@@ -53,6 +58,18 @@ export default function Dashboard() {
                   <Bar dataKey="billing" fill={colors.blue} radius={[4,4,0,0]} />
                 </BarChart>
               </ResponsiveContainer>
+            </div>
+          )}
+
+          {maintenanceDue?.length > 0 && (
+            <div style={{ ...card, marginBottom:24, borderLeft:`3px solid ${colors.amber}` }}>
+              <h2 style={{ fontSize:16, fontWeight:600, marginBottom:12 }}>⚠️ Machines Due for Service</h2>
+              {maintenanceDue.map((m) => (
+                <div key={m.id} style={{ display:'flex', justifyContent:'space-between', padding:'7px 0', borderBottom:`1px solid ${colors.bgAlt}`, fontSize:13.5 }}>
+                  <span>{m.machine} — {m.customer}</span>
+                  <span style={{ color:colors.amber, fontWeight:600 }}>Warranty expires {format(new Date(m.warranty_until), 'MMM d, yyyy')}</span>
+                </div>
+              ))}
             </div>
           )}
 

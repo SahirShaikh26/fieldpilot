@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { AuthProvider, useAuth } from './src/hooks/useAuth';
+import { OfflineQueueProvider } from './src/hooks/useOfflineQueue';
 import AppNavigator from './src/navigation/AppNavigator';
 
 function RootApp() {
@@ -21,7 +22,9 @@ function RootApp() {
 export default function App() {
   return (
     <AuthProvider>
-      <RootApp />
+      <OfflineQueueProvider>
+        <RootApp />
+      </OfflineQueueProvider>
     </AuthProvider>
   );
 }

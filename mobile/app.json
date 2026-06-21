@@ -14,14 +14,15 @@
     "jsEngine": "hermes",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.yourcompany.fieldpilot"
+      "bundleIdentifier": "com.fieldpilot.mobile"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#2563eb"
       },
-      "package": "com.yourcompany.fieldpilot",
+      "package": "com.fieldpilot.mobile",
+      "versionCode": 2,
       "permissions": [
         "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION",
@@ -38,12 +39,26 @@
       ],
       "expo-document-picker",
       [
+        "expo-image-picker",
+        {
+          "photosPermission": "FieldPilot needs photo library access so you can attach photos to activity logs.",
+          "cameraPermission": "FieldPilot needs camera access so you can take photos of completed work."
+        }
+      ],
+      [
         "expo-build-properties",
         {
           "android": {
             "enableProguardInReleaseBuilds": true,
             "enableShrinkResourcesInReleaseBuilds": true
           }
+        }
+      ],
+      [
+        "expo-speech-recognition",
+        {
+          "microphonePermission": "FieldPilot needs microphone access so you can dictate activity notes by voice.",
+          "speechRecognitionPermission": "FieldPilot needs speech recognition access to convert your dictated notes into text."
         }
       ]
     ],

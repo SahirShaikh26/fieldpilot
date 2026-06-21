@@ -61,14 +61,14 @@ export default function Logs() {
           <table style={s.table}>
             <thead>
               <tr>
-                {['Date','Engineer','Customer','Activity','Hours','Billing','Status','Notes',''].map(h => (
+                {['Date','Engineer','Customer','Activity','Hours','Billing','Status','Notes','Photos',''].map(h => (
                   <th key={h} style={s.th}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {data?.data?.length === 0 && (
-                <tr><td colSpan={9} style={{ ...s.td, textAlign:'center', color:colors.textFaint, padding:32 }}>No logs found</td></tr>
+                <tr><td colSpan={10} style={{ ...s.td, textAlign:'center', color:colors.textFaint, padding:32 }}>No logs found</td></tr>
               )}
               {data?.data?.map(log => (
                 <tr key={log.id}>
@@ -85,6 +85,20 @@ export default function Logs() {
                   <td style={s.td}>{log.status || '—'}</td>
                   <td style={{ ...s.td, maxWidth:200, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
                     {log.notes || '—'}
+                  </td>
+                  <td style={s.td}>
+                    {log.photo_urls?.length > 0 && (
+                      <div style={{ display:'flex', gap:4 }}>
+                        {log.photo_urls.slice(0, 3).map((url, i) => (
+                          <a key={i} href={url} target="_blank" rel="noreferrer">
+                            <img src={url} alt="" style={{ width:32, height:32, objectFit:'cover', borderRadius:5, border:`1px solid ${colors.border}` }} />
+                          </a>
+                        ))}
+                        {log.photo_urls.length > 3 && (
+                          <span style={{ fontSize:11, color:colors.textMuted, alignSelf:'center' }}>+{log.photo_urls.length - 3}</span>
+                        )}
+                      </div>
+                    )}
                   </td>
                   <td style={s.td}>
                     {['Director','Manager'].includes(user?.role) && (

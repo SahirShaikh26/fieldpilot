@@ -11,6 +11,7 @@ const NAV = [
   { to: '/logs',      label: 'Activity Logs', icon: '📋' },
   { to: '/logs/new',  label: 'Log Activity', icon: '✏️' },
   { to: '/projects',  label: 'Projects',     icon: '🗂️' },
+  { to: '/schedule',  label: 'Schedule',     icon: '🗓️' },
   { to: '/customers', label: 'Customers',    icon: '🏭' },
   { to: '/engineers', label: 'Team',         icon: '👷' },
   { to: '/analytics', label: 'Analytics',   icon: '📈' },
@@ -18,6 +19,7 @@ const NAV = [
   { to: '/import',    label: 'Import Data', icon: '📥' },
   { to: '/digest',    label: 'Daily Digest', icon: '🧠', roles: ['Director', 'Manager'] },
   { to: '/billing',   label: 'Billing',     icon: '💳', roles: ['Director'] },
+  { to: '/settings',  label: 'Settings',    icon: '⚙️', roles: ['Director'] },
   { to: '/status',    label: 'Status',      icon: '🩺', ownerOnly: true },
 ];
 

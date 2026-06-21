@@ -14,7 +14,7 @@ function periodRange(period) {
   return { start: toDate(start), end: toDate(end) };
 }
 
-function buildPrompt({ period, totals, byActivity, byEngineer, recurring, sampleNotes }) {
+function buildPrompt({ period, totals, byActivity, byEngineer, recurring, sampleNotes, maintenanceDue }) {
   return `You are a field-service operations analyst. Given the JSON data below for a ${period === 'day' ? "single day's" : "past week's"} field service activity, produce ONLY a valid JSON object (no markdown, no commentary) with this exact shape:
 
 {
@@ -28,6 +28,7 @@ Totals: ${JSON.stringify(totals)}
 By activity code: ${JSON.stringify(byActivity)}
 By engineer (hours/billing): ${JSON.stringify(byEngineer)}
 Machines serviced 3+ times in the last 30 days (possible recurring faults): ${JSON.stringify(recurring)}
+Machines with warranty expiring within 30 days (mention in summary if relevant, do NOT add to anomalies — these are added separately): ${JSON.stringify(maintenanceDue)}
 Sample engineer notes from this period: ${JSON.stringify(sampleNotes)}
 
 If there is no data, say so plainly in the summary and return an empty anomalies array. Output only the JSON object.`;
@@ -49,7 +50,7 @@ router.post('/generate', async (req, res) => {
   const { start, end } = periodRange(period);
 
   try {
-    const [totals, byActivity, byEngineer, recurring, notesRows] = await Promise.all([
+    const [totals, byActivity, byEngineer, recurring, notesRows, maintenanceDue] = await Promise.all([
       db.query(
         `SELECT COUNT(*) AS total_logs, SUM(hours) AS total_hours, SUM(billing_inr) AS total_billing,
                 COUNT(DISTINCT engineer_id) AS active_engineers, COUNT(DISTINCT customer_id) AS customers_served
@@ -84,6 +85,14 @@ router.post('/generate', async (req, res) => {
          ORDER BY submitted_at DESC LIMIT 50`,
         [req.tenantId, start, end]
       ),
+      db.query(
+        `SELECT m.name AS machine, c.name AS customer, m.warranty_until
+         FROM machines m JOIN customers c ON c.id = m.customer_id
+         WHERE c.tenant_id=$1 AND m.warranty_until IS NOT NULL
+           AND m.warranty_until BETWEEN CURRENT_DATE AND (CURRENT_DATE + INTERVAL '30 days')
+         ORDER BY m.warranty_until ASC`,
+        [req.tenantId]
+      ),
     ]);
 
     const prompt = buildPrompt({
@@ -93,17 +102,26 @@ router.post('/generate', async (req, res) => {
       byEngineer: byEngineer.rows,
       recurring: recurring.rows,
       sampleNotes: notesRows.rows.map((r) => r.notes),
+      maintenanceDue: maintenanceDue.rows,
     });
 
     const raw = await llm.complete(prompt);
     const parsed = parseLLMJson(raw);
+
+    // Maintenance-due anomalies are deterministic facts, not LLM judgment —
+    // appended directly rather than trusting the model to transcribe them.
+    const maintenanceAnomalies = maintenanceDue.rows.map((m) => ({
+      type: 'maintenance_due',
+      description: `${m.machine} (${m.customer}) warranty expires ${new Date(m.warranty_until).toLocaleDateString('en-IN')}`,
+    }));
+    const anomalies = [...(parsed.anomalies || []), ...maintenanceAnomalies];
 
     const { rows } = await db.query(
       `INSERT INTO digests (tenant_id, period_type, period_start, period_end, summary, anomalies, customer_blurb, generated_by)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,
       [
         req.tenantId, period, start, end,
-        parsed.summary || '', JSON.stringify(parsed.anomalies || []), parsed.customer_blurb || '',
+        parsed.summary || '', JSON.stringify(anomalies), parsed.customer_blurb || '',
         req.user.id,
       ]
     );

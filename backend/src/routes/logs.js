@@ -60,7 +60,7 @@ router.post('/', async (req, res) => {
   const {
     customer_id, machine_id, project_id, date, activity_code,
     query_type, product_type, hours, billing_inr, cost_inr,
-    status, location, notes,
+    status, location, notes, visit_id, photo_urls,
   } = req.body;
 
   if (!activity_code || !date) {
@@ -72,15 +72,21 @@ router.post('/', async (req, res) => {
       `INSERT INTO activity_logs
          (tenant_id, engineer_id, customer_id, machine_id, project_id,
           date, activity_code, query_type, product_type, hours,
-          billing_inr, cost_inr, status, location, notes)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
+          billing_inr, cost_inr, status, location, notes, visit_id, photo_urls)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)
        RETURNING *`,
       [
         req.tenantId, req.user.id, customer_id || null, machine_id || null, project_id || null,
         date, activity_code, query_type || null, product_type || null, hours || null,
         billing_inr || 0, cost_inr || 0, status || null, location || null, notes || null,
+        visit_id || null, JSON.stringify(photo_urls || []),
       ]
     );
+
+    if (visit_id) {
+      await db.query(`UPDATE visits SET status='Completed' WHERE id=$1 AND tenant_id=$2`, [visit_id, req.tenantId]);
+    }
+
     res.status(201).json(rows[0]);
   } catch (err) {
     console.error(err);
@@ -111,7 +117,7 @@ router.put('/:id', async (req, res) => {
   const {
     customer_id, machine_id, project_id, date, activity_code,
     query_type, product_type, hours, billing_inr, cost_inr,
-    status, location, notes,
+    status, location, notes, photo_urls,
   } = req.body;
 
   try {
@@ -119,13 +125,15 @@ router.put('/:id', async (req, res) => {
       `UPDATE activity_logs SET
          customer_id=$1, machine_id=$2, project_id=$3, date=$4,
          activity_code=$5, query_type=$6, product_type=$7, hours=$8,
-         billing_inr=$9, cost_inr=$10, status=$11, location=$12, notes=$13
-       WHERE id=$14 AND tenant_id=$15
+         billing_inr=$9, cost_inr=$10, status=$11, location=$12, notes=$13,
+         photo_urls=COALESCE($14, photo_urls)
+       WHERE id=$15 AND tenant_id=$16
        RETURNING *`,
       [
         customer_id, machine_id, project_id, date, activity_code,
         query_type, product_type, hours, billing_inr, cost_inr,
-        status, location, notes, req.params.id, req.tenantId,
+        status, location, notes, photo_urls ? JSON.stringify(photo_urls) : null,
+        req.params.id, req.tenantId,
       ]
     );
     if (!rows.length) return res.status(404).json({ error: 'Log not found' });

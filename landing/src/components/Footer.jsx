@@ -11,6 +11,7 @@ export default function Footer() {
             <a href="#pricing">Pricing</a>
             <a href={LOGIN_URL}>Log In</a>
             <a href={SIGNUP_URL}>Start Free Trial</a>
+            <a href="/privacy.html">Privacy Policy</a>
             <a href="mailto:hello@fieldpilot.app">Contact</a>
           </div>
         </div>

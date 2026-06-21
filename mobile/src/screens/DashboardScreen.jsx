@@ -17,6 +17,7 @@ function StatCard({ label, value, color = '#2563eb' }) {
 export default function DashboardScreen({ navigation }) {
   const { user, logout } = useAuth();
   const [summary, setSummary] = useState(null);
+  const [visits, setVisits] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -25,6 +26,9 @@ export default function DashboardScreen({ navigation }) {
       .then(r => setSummary(r.data))
       .catch(console.error)
       .finally(() => setLoading(false));
+    api.get('/visits', { params: { date: 'today', status: 'Scheduled' } })
+      .then(r => setVisits(r.data))
+      .catch(() => {});
   }, []);
 
   const handleLogout = () => {
@@ -64,6 +68,26 @@ export default function DashboardScreen({ navigation }) {
           <TouchableOpacity style={s.secondaryBtn} onPress={() => navigation.navigate('Check In')}>
             <Text style={s.secondaryBtnText}>📍  Check In / Out</Text>
           </TouchableOpacity>
+
+          {visits.length > 0 && (
+            <View style={s.card}>
+              <Text style={s.cardTitle}>Today's Scheduled Visits</Text>
+              {visits.map((v) => (
+                <TouchableOpacity
+                  key={v.id}
+                  style={s.visitRow}
+                  onPress={() => navigation.navigate('Log Activity', { visit: v })}
+                >
+                  <View style={{ flex: 1 }}>
+                    <Text style={s.visitCustomer}>🏭 {v.customer_name}</Text>
+                    {v.machine_name && <Text style={s.visitMeta}>⚙️ {v.machine_name}</Text>}
+                    {v.notes && <Text style={s.visitMeta}>{v.notes}</Text>}
+                  </View>
+                  <Text style={s.visitArrow}>›</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
 
           {summary?.by_activity?.length > 0 && (
             <View style={s.card}>
@@ -105,4 +129,8 @@ const s = StyleSheet.create({
   row:          { flexDirection:'row', justifyContent:'space-between', paddingVertical:6, borderBottomWidth:1, borderBottomColor:COLORS.bgAlt },
   rowCode:      { fontWeight:'700', color:COLORS.blue, width:40 },
   rowVal:       { color:COLORS.text, fontSize:13 },
+  visitRow:     { flexDirection:'row', alignItems:'center', paddingVertical:10, borderBottomWidth:1, borderBottomColor:COLORS.bgAlt },
+  visitCustomer:{ fontSize:14, fontWeight:'700', color:COLORS.navy },
+  visitMeta:    { fontSize:12, color:COLORS.textMuted, marginTop:2 },
+  visitArrow:   { fontSize:22, color:COLORS.textFaint, marginLeft:8 },
 });
