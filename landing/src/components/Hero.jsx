@@ -5,13 +5,14 @@ export default function Hero() {
     <section className="hero">
       <div className="container hero-grid">
         <div>
-          <span className="eyebrow">FOR FIELD SERVICE TEAMS</span>
+          <span className="eyebrow">AI-POWERED · FOR FIELD SERVICE TEAMS</span>
           <h1>
             Run your field operations <span>without the spreadsheets</span>
           </h1>
           <p>
             FieldPilot gives growing field service companies one place to track engineers,
-            projects, customers, and daily activity — built for teams of 5 to 500.
+            projects, customers, and daily activity — with an AI digest that writes your
+            reports for you. Built for teams of 5 to 500, works offline in the field.
           </p>
           <div className="hero-ctas">
             <a href={SIGNUP_URL} className="btn btn-primary btn-lg">Start Free 14-Day Trial</a>
